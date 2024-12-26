@@ -4,19 +4,28 @@ Node* createNode(String label)
 {
   Node* newNode = new Node;
   newNode->label = label;
+  newNode->info = F("");
   newNode->childCount = 0;
   newNode->parent = nullptr;
+
+  for(int i=0;i<MAX_N_CHILD;i++)
+    newNode->children[i] = nullptr;
+
   return newNode;
 }
+
 void addChild(Node* parent, Node* child)
 {
-  parent->children[(parent->childCount)++] = child;
-  child->parent = parent;
+  if (parent != nullptr and child != nullptr)
+  {
+    parent->children[(parent->childCount)++] = child;
+    child->parent = parent;
+  }
 }
+
 Node* initializeTree()
 {
   Node* root = createNode(F("omar@arduino:\\n/$_")); //flash
-  //Node* root = createNode(String(str_root)); //sram
 
 
   Node* login = createNode(F(">login"));
@@ -30,7 +39,6 @@ Node* initializeTree()
 
   Node* cronometer = createNode(F(">cronometer"));
   addChild(login, cronometer);
-  //addChild(timer, createNode(F(">up/down")));
   addChild(cronometer, createNode(F(">start")));
   addChild(cronometer, createNode(F(">pause")));
   addChild(cronometer, createNode(F(">reset")));

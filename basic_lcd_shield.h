@@ -35,4 +35,3 @@ void navigateBack();
 void navigateDown();
 void toggleLight();
 void navigateUp();
-

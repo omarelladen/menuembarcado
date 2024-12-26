@@ -68,7 +68,7 @@ void Cronometer::printCronometer(LiquidCrystal lcd)
 
 void Cronometer::updateCronometer()
 {
-  static unsigned long previousMillis = 0;
+  static unsigned long previousMillis = millis(); //static so eh criada uma vez (inicializa com 0 uma vez); nao eh destruida ao sair da func; escopo local
   unsigned long currentMillis = millis();
 
   if (currentMillis - previousMillis >= 1000)

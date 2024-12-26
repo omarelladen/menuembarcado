@@ -25,9 +25,10 @@
 //colocar as funct de cronometro na classe
 //so reprintar o numer o do count (mudar chamada do displayCurrentNode)
 //colocar volatile
-//tratar retorno do push da stack
+//tratar retorno do push e pop da stack
 //separar melhor em funcoes
 //VER BEM separacao das funcoes de cada menu e o WHILE ruim do cronometro; RTOS firmware; prints (ger graf)
+//checar se nullptr (OK pros children, Node parent e Node child - apenas nao realiza a tarefa se for nullptr)
 
 //#include <Arduino.h>
 //#include <LiquidCrystal.h>
@@ -58,7 +59,7 @@ static int16_t g_cont = 0;
 static Cronometer g_cronometer;
 static int8_t g_estadoBotaoAnt = bt_NENHUM;
 static unsigned long g_bt_delay = 0;
-bool isCronometerRunning = false;
+static bool cronometer_is_running = false;
 
 void setup()
 {
@@ -93,13 +94,15 @@ void navigateBack()
 void navigateUp()
 {
   if (cursor > 0)
-    g_currentNode = g_currentNode->parent->children[--cursor];
+    if (g_currentNode->parent->children[cursor-1] != nullptr)
+      g_currentNode = g_currentNode->parent->children[--cursor];
 }
 
 void navigateDown()
 {
   if (cursor < g_currentNode->parent->childCount - 1 and g_currentNode->label != F("omar@arduino:\\n/$_")) //nao pd ir para tras da raiz
-    g_currentNode = g_currentNode->parent->children[++cursor];
+    if (g_currentNode->parent->children[cursor+1] != nullptr)
+      g_currentNode = g_currentNode->parent->children[++cursor];
 }
 
 
@@ -108,9 +111,12 @@ void selectNode()
   // Navegacao
   if (g_currentNode->childCount > 0)
   {
-    g_currentNode = g_currentNode->children[0];
-    g_menu_cursor_stack.push(cursor);
-    cursor = 0;
+    if (g_currentNode->children[0] != nullptr)
+    {
+      g_currentNode = g_currentNode->children[0];
+      g_menu_cursor_stack.push(cursor);
+      cursor = 0;
+    }      
   }
   
 
@@ -122,13 +128,13 @@ void selectNode()
   else if (g_currentNode->label == String(F(">reset")) and g_currentNode->parent->label == String(F(">counter")))
     g_cont=0;
   else if (g_currentNode->label == String(F(">start")))
-    isCronometerRunning = true;
+    cronometer_is_running = true;
   else if (g_currentNode->label == String(F(">pause")))
-    isCronometerRunning = false;
+    cronometer_is_running = false;
   else if (g_currentNode->label == String(F(">reset")) and g_currentNode->parent->label == String(F(">cronometer")))
   {
     g_cronometer.reset();
-    isCronometerRunning = false;
+    cronometer_is_running = false;
   }
   else if (g_currentNode->label == String(F(">logout")))
     g_currentNode = g_currentNode->parent->parent;
@@ -170,11 +176,14 @@ void displayCurrentNode()
       // Proxima opcao, se existir
       if (g_currentNode->parent->childCount > cursor+1)
       {
-        String label = g_currentNode->parent->children[cursor+1]->label;
-        label.setCharAt(0, ' ');
-        
-        lcd.setCursor(0, 1);
-        lcd.print(label); 
+        if (g_currentNode->parent->children[cursor+1] != nullptr)
+        {
+          String label = g_currentNode->parent->children[cursor+1]->label;
+          label.setCharAt(0, ' ');
+          
+          lcd.setCursor(0, 1);
+          lcd.print(label); 
+        }
       }
   }
 
@@ -264,6 +273,6 @@ void loop()
   displayCurrentNode(); //desnecessario o tempo todo mas desacoplado (melhorar)
   handleButtonPress(checkButtonPress());
 
-  if (isCronometerRunning)
+  if (cronometer_is_running)
     g_cronometer.updateCronometer();
 }
