@@ -10,6 +10,7 @@ class Stack {
 
   public:
     Stack();
+    int8_t getTop() const;
     bool isEmpty() const;
     bool isFull() const;
     bool push(int8_t value);

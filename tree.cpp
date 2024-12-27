@@ -45,6 +45,22 @@ Node* Node::initializeTree()
   Node* login = new Node(F(">login"));
   addChild(root, login);
 
+  addChild(login, new Node(F(">0")));
+  addChild(login, new Node(F(">1")));
+  // addChild(login, new Node(F(">2")));
+  // addChild(login, new Node(F(">3")));
+  // addChild(login, new Node(F(">4")));
+  // addChild(login, new Node(F(">5")));
+  // addChild(login, new Node(F(">6")));
+  // addChild(login, new Node(F(">7")));
+  // addChild(login, new Node(F(">8")));
+  // addChild(login, new Node(F(">9")));
+  addChild(login, new Node(F(">delete")));
+  Node* enter = new Node(F(">enter"));
+  addChild(login, enter);
+
+
+
   Node* light = new Node(F(">lcd light"));
   addChild(root, light);
   addChild(light, new Node(F(">on")));
@@ -52,21 +68,21 @@ Node* Node::initializeTree()
 
 
   Node* cronometer = new Node(F(">cronometer"));
-  addChild(login, cronometer);
+  addChild(enter, cronometer);
   addChild(cronometer, new Node(F(">start")));
   addChild(cronometer, new Node(F(">pause")));
   addChild(cronometer, new Node(F(">reset")));
 
 
   Node* counter = new Node(F(">counter"));
-  addChild(login, counter);
+  addChild(enter, counter);
   addChild(counter, new Node(F(">up")));
   addChild(counter, new Node(F(">down")));
   addChild(counter, new Node(F(">reset")));
 
 
   Node* system = new Node(F(">system"));
-  addChild(login, system);
+  addChild(enter, system);
 
   Node* board = new Node(F(">board"));
   addChild(system, board);
@@ -81,9 +97,9 @@ Node* Node::initializeTree()
   addChild(ucontroller, new Node(F("SRAM:\\n2 KB")));
   addChild(ucontroller, new Node(F("EEPROM:\\n1 KB")));
 
-  Node* display_shield = new Node(F(">display"));
-  addChild(system, display_shield);
-  addChild(display_shield, new Node(F("shield:\\nLCD Keypad")));
+  // Node* display_shield = new Node(F(">display"));
+  // addChild(system, display_shield);
+  // addChild(display_shield, new Node(F("shield:\\nLCD Keypad")));
 
   Node* firmware = new Node(F(">firmware"));
   addChild(system, firmware);
@@ -91,7 +107,7 @@ Node* Node::initializeTree()
   addChild(firmware, new Node(F("compiler:\\navr-g++")));
   addChild(firmware, new Node(F("author:\\nOmar El Laden")));
 
-  addChild(login, new Node(F(">logout")));
+  addChild(enter, new Node(F(">logout")));
 
   return root;
 }

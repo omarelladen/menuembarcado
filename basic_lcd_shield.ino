@@ -1,37 +1,43 @@
-//colocar sys info em arq de cartao sd
+//cartao sd
 //cronometro e timer - manter printado enquanto mexe no menu (OK)
 //sinal sonoro
 //contador simples (OK)
-//senha
+//senha (OK - simples)
 //logout (OK)
 //turnoff (OK)
 //info firmware/kernel = prog c++ arduino ide by Omar El Laden v0.0.0 (OK)
 //ver outras melhorias de RAM
 //monitorar sensores
-//aproveitar o bt R (OK - toggle light por agr, mas ele interrompe o cronometro)
-//multithread (pro tempo?)
+//aproveitar o bt R (OK - toggle light)
 //var byte a byte
 //printar na 2a linha o filho[i+1] se existir (OK)
 //colocar func pra calcular o tempo durante o menu de timer apos seu star, e func pra pausar e reiniciar diretamente
 //logs em arq
-//melhorar g_var da linguagem (sem main)
+//melhorar g_var da linguagem
 //melhorar div de arq (como separar em cpps)
-//melhorar class/struct
+//melhorar class/struct (OK-indo)
 //melhorar ger grafico, de eventos e de estados
-//criar classe t pra ter metodo reset() e count() (q conta por si em vez de por fora)
+//criar classe t pra ter metodo reset() e count() (q conta por si em vez de por fora) (OK)
 //ver destrutoras, ptr em vez de global(?)
 //stop funciona implicitamente com gambiarra, e tmb pausa qnd da um down soq add +1seg -> agr da +1 so qnd inicia ou reinicia, e basta ir pra baixo pra pausar (precisa melhorar pra ter qnd for pra baixo continuar e pausar so qnd dar select no pause)
-//timer (down)
-//colocar as funct de cronometro na classe
+//timer down
+//colocar as funct de cronometro na classe (OK)
 //so reprintar o numer o do count (mudar chamada do displayCurrentNode)
-//colocar volatile
 //tratar retorno do push e pop da stack
-//separar melhor em funcoes
-//VER BEM separacao das funcoes de cada menu e o WHILE ruim do cronometro; RTOS firmware; prints (ger graf)
-//checar se nullptr (OK pros children, Node parent e Node child - apenas nao realiza a tarefa se for nullptr)
-//colocar str usadas mais de uma vez em var
+//separar melhor em funcoes e criar classes pras principais n ficarem soltas
 //melhorar classes, como private/public
-//ver uso de new pro Node, rever nome e classe 
+//VER BEM separacao das funcoes de cada menu e o WHILE ruim do cronometro; RTOS firmware; prints (ger graf) (OK-bem melhor)
+//checar se nullptr (OK - pros children, Node parent e Node child apenas nao realiza a tarefa se for nullptr)
+//colocar str usadas mais de uma vez em var
+//ver uso de new pro Node, rever nome e classe
+//comunicacao usb
+//calculadora
+//melhorar o ">"
+//rever arrays
+//tirar senha de stack talvez
+//hash pra senha
+//criptografia
+
 
 //#include <Arduino.h>
 //#include <LiquidCrystal.h>
@@ -59,12 +65,16 @@ static unsigned long g_bt_delay=0;
 static Cronometer g_cronometer;
 static Stack g_menu_cursor_stack;
 static int16_t g_cont=0;
-static int8_t cursor=0;
-static bool lcd_is_clean=false;
+static int8_t g_cursor=0;
+static bool g_lcd_is_clean=false;
+static Stack g_pw;//se n for global precisaria alocar array?
+static int8_t g_kb_n=0;
 
 void setup()
 {
   lcd.begin(16, 2);
+
+  //Serial.begin(9600);
 
   // Luz
   DDRB|=(1<<DDB2);//pinMode(pin_back_light, OUTPUT);
@@ -83,29 +93,29 @@ void navigateBack()
 {
   if (g_currentNode->getParent() != nullptr)
   {
-    lcd_is_clean=false;
+    g_lcd_is_clean=false;
     g_currentNode = g_currentNode->getParent();
-    cursor = g_menu_cursor_stack.pop();
+    g_cursor = g_menu_cursor_stack.pop();
   } 
 }
 
 void navigateUp()
 {
-  if (cursor > 0)
-    if (g_currentNode->getParent()->getChild(cursor-1) != nullptr)
+  if (g_cursor > 0)
+    if (g_currentNode->getParent()->getChild(g_cursor-1) != nullptr)
     {
-      lcd_is_clean=false;
-      g_currentNode = g_currentNode->getParent()->getChild(--cursor);
+      g_lcd_is_clean=false;
+      g_currentNode = g_currentNode->getParent()->getChild(--g_cursor);
     }
 }
 
 void navigateDown()
 {
-  if (cursor < g_currentNode->getParent()->getChildCount() - 1 and g_currentNode->getLabel() != F("omar@arduino:\\n/$_")) //nao pd ir para tras da raiz
-    if (g_currentNode->getParent()->getChild(cursor+1) != nullptr)
+  if (g_cursor < g_currentNode->getParent()->getChildCount() - 1 and g_currentNode->getLabel() != F("omar@arduino:\\n/$_")) //nao pd ir para tras da raiz
+    if (g_currentNode->getParent()->getChild(g_cursor+1) != nullptr)
     {
-      lcd_is_clean=false;
-      g_currentNode = g_currentNode->getParent()->getChild(++cursor);
+      g_lcd_is_clean=false;
+      g_currentNode = g_currentNode->getParent()->getChild(++g_cursor);
     }
 }
 
@@ -116,10 +126,38 @@ void selectNode()
   {
     if (g_currentNode->getChild(0) != nullptr)
     {
-      lcd_is_clean=false;
-      g_currentNode = g_currentNode->getChild(0);
-      g_menu_cursor_stack.push(cursor);
-      cursor = 0;
+      bool pass = false;
+      if (g_currentNode->getLabel() == String(F(">enter")))
+      {
+        if(g_pw.getTop()+1 == max_pw_lenght)
+        {
+          int8_t pw_3 = g_pw.pop();
+          int8_t pw_2 = g_pw.pop();
+          int8_t pw_1 = g_pw.pop();
+          int8_t pw_0 = g_pw.pop();
+
+          if(pw_0 == PW_0 and
+             pw_1 == PW_1 and
+             pw_2 == PW_2 and
+             pw_3 == PW_3)
+          {
+            pass = true;
+          }
+        }
+      }
+      else
+      {
+        pass = true;
+      }
+      
+      if(pass == true)
+      {
+        lcd.print(F("UEEEEEE"));
+        g_lcd_is_clean=false;
+        g_currentNode = g_currentNode->getChild(0);
+        g_menu_cursor_stack.push(g_cursor);
+        g_cursor = 0;
+      }
     }      
   } 
 
@@ -140,16 +178,62 @@ void selectNode()
     cronometer_is_running = false;
   }
   else if (g_currentNode->getLabel() == String(F(">logout")))
-    g_currentNode = g_currentNode->getParent()->getParent();
+  {
+    // g_currentNode = g_currentNode->getParent()->getParent();
+    // g_lcd_is_clean=false;
+    navigateBack();
+    navigateBack();
+  }
   else if (g_currentNode->getLabel() == String(F(">on")))
     PORTB|=(1<<PB2);//digitalWrite(pin_back_light, HIGH);
   else if (g_currentNode->getLabel() == String(F(">off")))
     PORTB&=!(1<<PB2);//digitalWrite(pin_back_light, LOW);
+  else if (g_currentNode->getLabel() == String(F(">0")))
+  {
+    if(g_pw.getTop()+1 < max_pw_lenght)
+    {
+      g_pw.push(0);
+
+    }
+  }
+  else if (g_currentNode->getLabel() == String(F(">1")))
+  {
+    if(g_pw.getTop()+1 < max_pw_lenght)
+    {
+      g_pw.push(1);
+
+    }
+
+  }
+  // else if (g_currentNode->getLabel() == String(F(">2")))
+  // {
+  //   if(g_pw.getTop()+1 < max_pw_lenght)
+  //   {
+  //     g_pw.push(2);
+
+  //   }
+  // }
+  // else if (g_currentNode->getLabel() == String(F(">3")))
+  // {
+  //   if(g_pw.getTop()+1 < max_pw_lenght)
+  //   {
+  //     g_pw.push(3);
+
+  //   }
+  // }
+  else if (g_currentNode->getLabel() == String(F(">delete")))
+  {
+    if(!g_pw.isEmpty())
+    {
+      g_pw.pop();
+      lcd.clear();
+    }
+  }
 }
 
 void displayCurrentNode()
 {
-  if (lcd_is_clean == false)
+  if (g_lcd_is_clean == false)
     lcd.clear();
 
   String text = g_currentNode->getLabel();
@@ -179,10 +263,10 @@ void displayCurrentNode()
       lcd.print(g_currentNode->getLabel());
 
       // Proxima opcao, se existir
-      if (g_currentNode->getParent()->getChildCount() > cursor+1)
-        if (g_currentNode->getParent()->getChild(cursor+1) != nullptr)
+      if (g_currentNode->getParent()->getChildCount() > g_cursor+1)
+        if (g_currentNode->getParent()->getChild(g_cursor+1) != nullptr)
         {
-          String label = g_currentNode->getParent()->getChild(cursor+1)->getLabel();
+          String label = g_currentNode->getParent()->getChild(g_cursor+1)->getLabel();
           label.setCharAt(0, ' ');       
           lcd.setCursor(0, 1);
           lcd.print(label); 
@@ -194,7 +278,7 @@ void displayCurrentNode()
   if (g_currentNode->getParent()->getLabel() == String(F(">cronometer")))// or g_currentNode->getLabel() == String(F(">cronometer")))
     g_cronometer.printCronometer(lcd);
 
-  if (g_currentNode->getParent()->getLabel() == String(F(">counter")))
+  else if (g_currentNode->getParent()->getLabel() == String(F(">counter")))
   {
     uint8_t pos_cursor = 13;
     if (g_cont >= 0)
@@ -204,11 +288,19 @@ void displayCurrentNode()
     lcd.setCursor(pos_cursor, 0);
     lcd.print(g_cont);
   }
+  else if (g_currentNode->getParent()->getLabel() == String(F(">login")))
+  {
+    for(int8_t i=0;i<g_pw.getTop()+1;i++)
+    {
+      lcd.setCursor(15-i, 0);
+      lcd.print(F("*"));
+    }
+  }
 }
 
 void handleButtonPress(int8_t botao)
 {
-  lcd_is_clean=true;
+  g_lcd_is_clean=true;
 
   //Quando o botao for apertado ou solto
   if ((millis() - g_bt_delay) > tempo_debounce)
@@ -275,13 +367,10 @@ uint8_t checkButtonPress()
 
 void loop()
 {
-
-
-  handleButtonPress(checkButtonPress());
-
   displayCurrentNode();
 
+  handleButtonPress(checkButtonPress());
+  
   if (cronometer_is_running)
     g_cronometer.updateCronometer();
-    
 }

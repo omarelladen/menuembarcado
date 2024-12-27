@@ -24,6 +24,12 @@
 
 #define tempo_debounce 50
 
+#define max_pw_lenght 4
+#define PW_0 0
+#define PW_1 0
+#define PW_2 0
+#define PW_3 1
+
 void handleButtonPress(int8_t botao);
 // void botaoApertado(int8_t botao);
 void botaoSolto(int8_t botao);

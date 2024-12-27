@@ -5,6 +5,8 @@ top(-1)// Pilha comeca vazia
 {
 }
 
+int8_t Stack::getTop() const {return top;}    
+
 bool Stack::isEmpty() const {return top == -1;}
 
 bool Stack::isFull() const {return (top == MAX_STACK_SIZE - 1);}
