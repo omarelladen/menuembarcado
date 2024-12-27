@@ -60,6 +60,7 @@ static Cronometer g_cronometer;
 static Stack g_menu_cursor_stack;
 static int16_t g_cont=0;
 static int8_t cursor=0;
+static bool lcd_is_clean=false;
 
 void setup()
 {
@@ -82,23 +83,30 @@ void navigateBack()
 {
   if (g_currentNode->getParent() != nullptr)
   {
+    lcd_is_clean=false;
     g_currentNode = g_currentNode->getParent();
     cursor = g_menu_cursor_stack.pop();
-  }
+  } 
 }
 
 void navigateUp()
 {
   if (cursor > 0)
     if (g_currentNode->getParent()->getChild(cursor-1) != nullptr)
+    {
+      lcd_is_clean=false;
       g_currentNode = g_currentNode->getParent()->getChild(--cursor);
+    }
 }
 
 void navigateDown()
 {
   if (cursor < g_currentNode->getParent()->getChildCount() - 1 and g_currentNode->getLabel() != F("omar@arduino:\\n/$_")) //nao pd ir para tras da raiz
     if (g_currentNode->getParent()->getChild(cursor+1) != nullptr)
+    {
+      lcd_is_clean=false;
       g_currentNode = g_currentNode->getParent()->getChild(++cursor);
+    }
 }
 
 void selectNode()
@@ -108,6 +116,7 @@ void selectNode()
   {
     if (g_currentNode->getChild(0) != nullptr)
     {
+      lcd_is_clean=false;
       g_currentNode = g_currentNode->getChild(0);
       g_menu_cursor_stack.push(cursor);
       cursor = 0;
@@ -140,6 +149,9 @@ void selectNode()
 
 void displayCurrentNode()
 {
+  if (lcd_is_clean == false)
+    lcd.clear();
+
   String text = g_currentNode->getLabel();
   
   int8_t loc_bar_n = -1;
@@ -168,18 +180,14 @@ void displayCurrentNode()
 
       // Proxima opcao, se existir
       if (g_currentNode->getParent()->getChildCount() > cursor+1)
-      {
         if (g_currentNode->getParent()->getChild(cursor+1) != nullptr)
         {
           String label = g_currentNode->getParent()->getChild(cursor+1)->getLabel();
-          label.setCharAt(0, ' ');
-          
+          label.setCharAt(0, ' ');       
           lcd.setCursor(0, 1);
           lcd.print(label); 
         }
-      }
   }
-
 
   // Prints de conteudos especificos de menus
 
@@ -200,6 +208,8 @@ void displayCurrentNode()
 
 void handleButtonPress(int8_t botao)
 {
+  lcd_is_clean=true;
+
   //Quando o botao for apertado ou solto
   if ((millis() - g_bt_delay) > tempo_debounce)
   {
@@ -217,7 +227,6 @@ void handleButtonPress(int8_t botao)
       g_bt_delay = millis();
     }
   }
-  
   g_estadoBotaoAnt = botao;
 }
 
@@ -230,8 +239,6 @@ void handleButtonPress(int8_t botao)
 void botaoSolto(int8_t botao)
 {
   //Quando um botão for solto
-
-  lcd.clear();
 
   if (botao == bt_DOWN)
     navigateDown();
@@ -268,9 +275,11 @@ uint8_t checkButtonPress()
 
 void loop()
 {
-  displayCurrentNode();
+
 
   handleButtonPress(checkButtonPress());
+
+  displayCurrentNode();
 
   if (cronometer_is_running)
     g_cronometer.updateCronometer();
