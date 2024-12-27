@@ -1,10 +1,13 @@
 #include "stack.h"
 
-Stack::Stack() { top = -1; } // Pilha comeca vazia
+Stack::Stack():
+top(-1)// Pilha comeca vazia
+{
+}
 
-bool Stack::isEmpty() { return top == -1; }
+bool Stack::isEmpty() const {return top == -1;}
 
-bool Stack::isFull() { return top == MAX_STACK_SIZE - 1; }
+bool Stack::isFull() const {return (top == MAX_STACK_SIZE - 1);}
 
 bool Stack::push(int8_t value)
 {

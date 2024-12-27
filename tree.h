@@ -1,17 +1,22 @@
 #pragma once
 #include <Arduino.h>
 
-#define MAX_N_CHILD 7
+#define N_MAX_CHILD 7
 
+class Node {
+  private:
+    String label;
+    Node* children[N_MAX_CHILD]; // Array de filhos 
+    int8_t childCount; 
+    Node* parent;
 
-struct Node {
-  String label;
-  String info;
-  Node* children[MAX_N_CHILD]; // Array de filhos 
-  int8_t childCount; 
-  Node* parent;
+  public:
+    Node(String label);
+    ~Node();
+    String getLabel() const;
+    Node* getChild(int8_t child_n) const;
+    int8_t getChildCount() const;
+    Node* getParent() const;
+    Node* initializeTree();
+    void addChild(Node* parent, Node* child);
 };
-
-Node* initializeTree();
-void addChild(Node* parent, Node* child);
-Node* createNode(String label);

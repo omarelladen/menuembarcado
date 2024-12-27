@@ -1,14 +1,20 @@
 #include "cronometer.h"
 
-Cronometer::Cronometer() { s=m=h=0; }
+Cronometer::Cronometer():
+s(0), m(0), h(0)
+{
+}
 
-uint8_t Cronometer::getS() { return s; }
+uint8_t Cronometer::getS() const {return s;}
 
-uint8_t Cronometer::getM() { return m; }
+uint8_t Cronometer::getM() const {return m;}
 
-uint8_t Cronometer::getH() { return h; }
+uint8_t Cronometer::getH() const {return h;}
 
-void Cronometer::reset() { s=m=h=0; }
+void Cronometer::reset()
+{
+  s=m=h=0;
+}
 
 void Cronometer::sec_count()
 {
@@ -25,7 +31,7 @@ void Cronometer::sec_count()
   }
 }
 
-void Cronometer::printCronometer(LiquidCrystal lcd)
+void Cronometer::printCronometer(LiquidCrystal lcd) const
 {
   if(h >= 10)
       lcd.setCursor(8, 0);
@@ -68,13 +74,11 @@ void Cronometer::printCronometer(LiquidCrystal lcd)
 
 void Cronometer::updateCronometer()
 {
-  static unsigned long previousMillis = millis(); //static so eh criada uma vez (inicializa com 0 uma vez); nao eh destruida ao sair da func; escopo local
+  static unsigned long previousMillis = millis(); //static so eh criada uma vez; nao eh destruida ao sair da func; escopo local
   unsigned long currentMillis = millis();
-
   if (currentMillis - previousMillis >= 1000)
   {
     previousMillis = currentMillis;
-
     sec_count();
   }
 }

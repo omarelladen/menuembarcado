@@ -10,12 +10,11 @@ class Cronometer {
 
   public:
     Cronometer();
-    uint8_t getS();
-    uint8_t getM();
-    uint8_t getH();
+    uint8_t getS() const;
+    uint8_t getM() const;
+    uint8_t getH() const;
     void reset();
     void sec_count();
-    void printCronometer(LiquidCrystal lcd);
+    void printCronometer(LiquidCrystal lcd) const;
     void updateCronometer();
 };
-

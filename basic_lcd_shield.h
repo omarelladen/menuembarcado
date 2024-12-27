@@ -22,7 +22,6 @@
 #define down_threshold 200
 #define right_threshold 60
 
-
 #define tempo_debounce 50
 
 void handleButtonPress(int8_t botao);

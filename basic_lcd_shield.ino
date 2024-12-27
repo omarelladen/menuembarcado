@@ -29,6 +29,9 @@
 //separar melhor em funcoes
 //VER BEM separacao das funcoes de cada menu e o WHILE ruim do cronometro; RTOS firmware; prints (ger graf)
 //checar se nullptr (OK pros children, Node parent e Node child - apenas nao realiza a tarefa se for nullptr)
+//colocar str usadas mais de uma vez em var
+//melhorar classes, como private/public
+//ver uso de new pro Node, rever nome e classe 
 
 //#include <Arduino.h>
 //#include <LiquidCrystal.h>
@@ -39,39 +42,32 @@
 #include "stack.h"
 #include "tree.h"
 
-// const char str_root[] = "omar:/$_";
-// const char PROGMEM str_root[] = "omar@arduino:/$_" //readProgmemString
+// const char         str_root[] = "omar@arduino:\\n/$_"
+// const char PROGMEM str_root[] = "omar@arduino:\\n/$_";
 // String readProgmemString(const char* progmemStr) {
-//     size_t len = strlen_P(progmemStr);// Calcula o tamanho da string em PROGMEM
-//     char buffer[len + 1];// Cria um buffer temporario na SRAM para copiar a string
-//     strcpy_P(buffer, progmemStr);// Copia a string da memoria Flash para o buffer na SRAM
-//     return String(buffer);// Converte o buffer para um objeto String e retorna
+//  size_t len = strlen_P(progmemStr);// Calcula o tamanho da string em PROGMEM
+//  char buffer[len + 1];// Cria um buffer temporario na SRAM para copiar a string
+//  strcpy_P(buffer, progmemStr);// Copia a string da memoria Flash para o buffer na SRAM
+//  return String(buffer);// Converte o buffer para um objeto String e retorna
 // }
-// const char descBotao0[] PROGMEM = "";// const char descBotao1[] PROGMEM = "S";// const char descBotao2[] PROGMEM = "L";// const char descBotao3[] PROGMEM = "D";// const char descBotao4[] PROGMEM = "U";// const char descBotao5[] PROGMEM = "R";
-// const char* const descBotao[6] PROGMEM = {descBotao0, descBotao1, descBotao2, descBotao3, descBotao4, descBotao5};
-//const String descBotao[6] = {"", "S", "L", "D", "U", "R"};
 
-LiquidCrystal lcd(pin_RS, pin_En, pin_D4, pin_D5, pin_D6, pin_D7);
-Node* g_currentNode;
-Stack g_menu_cursor_stack;
-static int8_t cursor = 0;
-static int16_t g_cont = 0;
+static LiquidCrystal lcd(pin_RS,pin_En,pin_D4,pin_D5,pin_D6,pin_D7);
+static Node* g_currentNode = g_currentNode->initializeTree();
+static int8_t g_estadoBotaoAnt=bt_NENHUM;
+static bool cronometer_is_running=false;
+static unsigned long g_bt_delay=0;
 static Cronometer g_cronometer;
-static int8_t g_estadoBotaoAnt = bt_NENHUM;
-static unsigned long g_bt_delay = 0;
-static bool cronometer_is_running = false;
+static Stack g_menu_cursor_stack;
+static int16_t g_cont=0;
+static int8_t cursor=0;
 
 void setup()
 {
   lcd.begin(16, 2);
 
   // Luz
-  DDRB|=(1<<DDB2); //pinMode(pin_back_light, OUTPUT);
+  DDRB|=(1<<DDB2);//pinMode(pin_back_light, OUTPUT);
   PORTB|=(1<<PB2);//digitalWrite(pin_back_light, HIGH);
-
-  //Serial.begin(9600);
-
-  g_currentNode = initializeTree();
 }
 
 void toggleLight()
@@ -84,9 +80,9 @@ void toggleLight()
 
 void navigateBack()
 {
-  if (g_currentNode->parent != nullptr)
+  if (g_currentNode->getParent() != nullptr)
   {
-    g_currentNode = g_currentNode->parent;
+    g_currentNode = g_currentNode->getParent();
     cursor = g_menu_cursor_stack.pop();
   }
 }
@@ -94,72 +90,69 @@ void navigateBack()
 void navigateUp()
 {
   if (cursor > 0)
-    if (g_currentNode->parent->children[cursor-1] != nullptr)
-      g_currentNode = g_currentNode->parent->children[--cursor];
+    if (g_currentNode->getParent()->getChild(cursor-1) != nullptr)
+      g_currentNode = g_currentNode->getParent()->getChild(--cursor);
 }
 
 void navigateDown()
 {
-  if (cursor < g_currentNode->parent->childCount - 1 and g_currentNode->label != F("omar@arduino:\\n/$_")) //nao pd ir para tras da raiz
-    if (g_currentNode->parent->children[cursor+1] != nullptr)
-      g_currentNode = g_currentNode->parent->children[++cursor];
+  if (cursor < g_currentNode->getParent()->getChildCount() - 1 and g_currentNode->getLabel() != F("omar@arduino:\\n/$_")) //nao pd ir para tras da raiz
+    if (g_currentNode->getParent()->getChild(cursor+1) != nullptr)
+      g_currentNode = g_currentNode->getParent()->getChild(++cursor);
 }
-
 
 void selectNode()
 {
   // Navegacao
-  if (g_currentNode->childCount > 0)
+  if (g_currentNode->getChildCount() > 0)
   {
-    if (g_currentNode->children[0] != nullptr)
+    if (g_currentNode->getChild(0) != nullptr)
     {
-      g_currentNode = g_currentNode->children[0];
+      g_currentNode = g_currentNode->getChild(0);
       g_menu_cursor_stack.push(cursor);
       cursor = 0;
     }      
-  }
-  
+  } 
 
   // Funcionalidades (sem filhos)
-  else if (g_currentNode->label == String(F(">up")))
+  else if (g_currentNode->getLabel() == String(F(">up")))
     g_cont++;
-  else if (g_currentNode->label == String(F(">down")))
+  else if (g_currentNode->getLabel() == String(F(">down")))
     g_cont--;
-  else if (g_currentNode->label == String(F(">reset")) and g_currentNode->parent->label == String(F(">counter")))
+  else if (g_currentNode->getLabel() == String(F(">reset")) and g_currentNode->getParent()->getLabel() == String(F(">counter")))
     g_cont=0;
-  else if (g_currentNode->label == String(F(">start")))
+  else if (g_currentNode->getLabel() == String(F(">start")))
     cronometer_is_running = true;
-  else if (g_currentNode->label == String(F(">pause")))
+  else if (g_currentNode->getLabel() == String(F(">pause")))
     cronometer_is_running = false;
-  else if (g_currentNode->label == String(F(">reset")) and g_currentNode->parent->label == String(F(">cronometer")))
+  else if (g_currentNode->getLabel() == String(F(">reset")) and g_currentNode->getParent()->getLabel() == String(F(">cronometer")))
   {
     g_cronometer.reset();
     cronometer_is_running = false;
   }
-  else if (g_currentNode->label == String(F(">logout")))
-    g_currentNode = g_currentNode->parent->parent;
-  else if (g_currentNode->label == String(F(">on")))
+  else if (g_currentNode->getLabel() == String(F(">logout")))
+    g_currentNode = g_currentNode->getParent()->getParent();
+  else if (g_currentNode->getLabel() == String(F(">on")))
     PORTB|=(1<<PB2);//digitalWrite(pin_back_light, HIGH);
-  else if (g_currentNode->label == String(F(">off")))
+  else if (g_currentNode->getLabel() == String(F(">off")))
     PORTB&=!(1<<PB2);//digitalWrite(pin_back_light, LOW);
-
 }
 
 void displayCurrentNode()
 {
-  String text = g_currentNode->label;
+  String text = g_currentNode->getLabel();
   
-  int8_t loc_barn = -1;
+  int8_t loc_bar_n = -1;
   int8_t i=0;
   for (i=0; i<text.length(); i++)
     if (text[i] == '\\')
       if(text[i+1] == 'n' and i<text.length())
-        loc_barn = i;
+        loc_bar_n = i;
 
-  if (loc_barn != -1) // se na tem \n
+  if (loc_bar_n != -1) // se tem \n
   {
-      String line1 = g_currentNode->label.substring(0, loc_barn);// Parte antes do \n
-      String line2 = g_currentNode->label.substring(loc_barn+2, i);// Parte depois do \n
+      String line1 = g_currentNode->getLabel().substring(0, loc_bar_n);// Parte antes do \n
+      String line2 = g_currentNode->getLabel().substring(loc_bar_n+2, i);// Parte depois do \n
 
       lcd.setCursor(0, 0);
       lcd.print(line1);
@@ -167,18 +160,18 @@ void displayCurrentNode()
       lcd.setCursor(0, 1);
       lcd.print(line2);
   }
-  else // Se não houver \n, exibe tudo na primeira linha
+  else // Se não tiver \n, exibe tudo na primeira linha
   {
       // Opcao atual
       lcd.setCursor(0, 0);
-      lcd.print(g_currentNode->label);
+      lcd.print(g_currentNode->getLabel());
 
       // Proxima opcao, se existir
-      if (g_currentNode->parent->childCount > cursor+1)
+      if (g_currentNode->getParent()->getChildCount() > cursor+1)
       {
-        if (g_currentNode->parent->children[cursor+1] != nullptr)
+        if (g_currentNode->getParent()->getChild(cursor+1) != nullptr)
         {
-          String label = g_currentNode->parent->children[cursor+1]->label;
+          String label = g_currentNode->getParent()->getChild(cursor+1)->getLabel();
           label.setCharAt(0, ' ');
           
           lcd.setCursor(0, 1);
@@ -187,14 +180,19 @@ void displayCurrentNode()
       }
   }
 
-  if (g_currentNode->parent->label == String(F(">cronometer")))// or g_currentNode->label == String(F(">cronometer")))
+
+  // Prints de conteudos especificos de menus
+
+  if (g_currentNode->getParent()->getLabel() == String(F(">cronometer")))// or g_currentNode->getLabel() == String(F(">cronometer")))
     g_cronometer.printCronometer(lcd);
 
-  if (g_currentNode->parent->label == String(F(">counter")))
+  if (g_currentNode->getParent()->getLabel() == String(F(">counter")))
   {
     uint8_t pos_cursor = 13;
-    if (g_cont >= 0) pos_cursor += (g_cont < 100) + (g_cont < 10);
-    else pos_cursor += (g_cont > -100) + (g_cont > -10) - 1;
+    if (g_cont >= 0)
+      pos_cursor += (g_cont < 100) + (g_cont < 10);
+    else
+      pos_cursor += (g_cont > -100) + (g_cont > -10) - 1;
     lcd.setCursor(pos_cursor, 0);
     lcd.print(g_cont);
   }
@@ -270,9 +268,11 @@ uint8_t checkButtonPress()
 
 void loop()
 {
-  displayCurrentNode(); //desnecessario o tempo todo mas desacoplado (melhorar)
+  displayCurrentNode();
+
   handleButtonPress(checkButtonPress());
 
   if (cronometer_is_running)
     g_cronometer.updateCronometer();
+    
 }

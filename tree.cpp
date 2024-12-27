@@ -1,20 +1,34 @@
 #include "tree.h"
 
-Node* createNode(String label)
+Node::Node(String label):
+label(label), parent(nullptr), childCount(0)
 {
-  Node* newNode = new Node;
-  newNode->label = label;
-  newNode->info = F("");
-  newNode->childCount = 0;
-  newNode->parent = nullptr;
-
-  for(int i=0;i<MAX_N_CHILD;i++)
-    newNode->children[i] = nullptr;
-
-  return newNode;
+  for(int i=0; i<N_MAX_CHILD; i++)
+    children[i] = nullptr;
 }
 
-void addChild(Node* parent, Node* child)
+Node::~Node()
+{
+    for(int i=0;i<childCount;i++)
+    {
+      if(children[i] != nullptr)
+      {
+        delete children[i];
+        children[i] = nullptr;
+      }
+    }
+    childCount = 0;
+}
+
+String Node::getLabel() const {return label;}
+
+Node* Node::getChild(int8_t child_n) const {return children[child_n];}
+
+int8_t Node::getChildCount() const {return childCount;}
+
+Node* Node::getParent() const {return parent;}
+
+void Node::addChild(Node* parent, Node* child)
 {
   if (parent != nullptr and child != nullptr)
   {
@@ -23,61 +37,61 @@ void addChild(Node* parent, Node* child)
   }
 }
 
-Node* initializeTree()
+Node* Node::initializeTree()
 {
-  Node* root = createNode(F("omar@arduino:\\n/$_")); //flash
+  Node* root = new Node(F("omar@arduino:\\n/$_")); //flash
 
 
-  Node* login = createNode(F(">login"));
+  Node* login = new Node(F(">login"));
   addChild(root, login);
 
-  Node* light = createNode(F(">lcd light"));
+  Node* light = new Node(F(">lcd light"));
   addChild(root, light);
-  addChild(light, createNode(F(">on")));
-  addChild(light, createNode(F(">off")));
+  addChild(light, new Node(F(">on")));
+  addChild(light, new Node(F(">off")));
 
 
-  Node* cronometer = createNode(F(">cronometer"));
+  Node* cronometer = new Node(F(">cronometer"));
   addChild(login, cronometer);
-  addChild(cronometer, createNode(F(">start")));
-  addChild(cronometer, createNode(F(">pause")));
-  addChild(cronometer, createNode(F(">reset")));
+  addChild(cronometer, new Node(F(">start")));
+  addChild(cronometer, new Node(F(">pause")));
+  addChild(cronometer, new Node(F(">reset")));
 
 
-  Node* counter = createNode(F(">counter"));
+  Node* counter = new Node(F(">counter"));
   addChild(login, counter);
-  addChild(counter, createNode(F(">up")));
-  addChild(counter, createNode(F(">down")));
-  addChild(counter, createNode(F(">reset")));
+  addChild(counter, new Node(F(">up")));
+  addChild(counter, new Node(F(">down")));
+  addChild(counter, new Node(F(">reset")));
 
 
-  Node* system = createNode(F(">system"));
+  Node* system = new Node(F(">system"));
   addChild(login, system);
 
-  Node* board = createNode(F(">board"));
+  Node* board = new Node(F(">board"));
   addChild(system, board);
-  addChild(board, createNode(F("model:\\nArduino UNO R3")));
+  addChild(board, new Node(F("model:\\nArduino UNO R3")));
 
-  Node* ucontroller = createNode(F(">ucontroller"));
+  Node* ucontroller = new Node(F(">ucontroller"));
   addChild(system, ucontroller);
-  addChild(ucontroller, createNode(F("model:\\nATmega328P")));
-  addChild(ucontroller, createNode(F("CPU:\\n8-bit AVR (RISC)")));
-  addChild(ucontroller, createNode(F("max speed:\\n20 MIPS @ 20 MHz")));
-  addChild(ucontroller, createNode(F("flash:\\n32 KB")));
-  addChild(ucontroller, createNode(F("SRAM:\\n2 KB")));
-  addChild(ucontroller, createNode(F("EEPROM:\\n1 KB")));
+  addChild(ucontroller, new Node(F("model:\\nATmega328P")));
+  addChild(ucontroller, new Node(F("CPU:\\n8-bit AVR (RISC)")));
+  addChild(ucontroller, new Node(F("max speed:\\n20 MIPS @ 20 MHz")));
+  addChild(ucontroller, new Node(F("flash:\\n32 KB")));
+  addChild(ucontroller, new Node(F("SRAM:\\n2 KB")));
+  addChild(ucontroller, new Node(F("EEPROM:\\n1 KB")));
 
-  Node* display_shield = createNode(F(">display"));
+  Node* display_shield = new Node(F(">display"));
   addChild(system, display_shield);
-  addChild(display_shield, createNode(F("shield:\\nLCD Keypad")));
+  addChild(display_shield, new Node(F("shield:\\nLCD Keypad")));
 
-  Node* firmware = createNode(F(">firmware"));
+  Node* firmware = new Node(F(">firmware"));
   addChild(system, firmware);
-  addChild(firmware, createNode(F("language:\\nArduino C++")));
-  addChild(firmware, createNode(F("compiler:\\navr-g++")));
-  addChild(firmware, createNode(F("author:\\nOmar El Laden")));
+  addChild(firmware, new Node(F("language:\\nArduino C++")));
+  addChild(firmware, new Node(F("compiler:\\navr-g++")));
+  addChild(firmware, new Node(F("author:\\nOmar El Laden")));
 
-  addChild(login, createNode(F(">logout")));
+  addChild(login, new Node(F(">logout")));
 
   return root;
 }
