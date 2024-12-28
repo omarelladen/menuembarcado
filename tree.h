@@ -13,6 +13,7 @@ class Node {
   public:
     Node(String label);
     ~Node();
+    void setLabel(String new_label);
     String getLabel() const;
     Node* getChild(int8_t child_n) const;
     int8_t getChildCount() const;

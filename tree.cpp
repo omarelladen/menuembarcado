@@ -20,6 +20,8 @@ Node::~Node()
     childCount = 0;
 }
 
+void Node::setLabel(String new_label) {label = new_label;}
+
 String Node::getLabel() const {return label;}
 
 Node* Node::getChild(int8_t child_n) const {return children[child_n];}
@@ -45,17 +47,10 @@ Node* Node::initializeTree()
   Node* login = new Node(F(">login"));
   addChild(root, login);
 
-  addChild(login, new Node(F(">0")));
-  addChild(login, new Node(F(">1")));
-  // addChild(login, new Node(F(">2")));
-  // addChild(login, new Node(F(">3")));
-  // addChild(login, new Node(F(">4")));
-  // addChild(login, new Node(F(">5")));
-  // addChild(login, new Node(F(">6")));
-  // addChild(login, new Node(F(">7")));
-  // addChild(login, new Node(F(">8")));
-  // addChild(login, new Node(F(">9")));
-  addChild(login, new Node(F(">delete")));
+  Node* keyboard = new Node(F(">keyboard"));
+  addChild(login, keyboard);
+  addChild(keyboard, new Node(F("0")));
+  addChild(login, new Node(F(">backspace")));
   Node* enter = new Node(F(">enter"));
   addChild(login, enter);
 

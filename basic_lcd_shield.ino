@@ -101,6 +101,16 @@ void navigateBack()
 
 void navigateUp()
 {
+  if(g_currentNode->getParent()->getLabel() == String(F(">keyboard")))
+  {
+    if (g_kb_n > 0)
+    {
+      
+      g_currentNode->setLabel(String(--g_kb_n));
+      g_lcd_is_clean=false;
+    }
+  }
+
   if (g_cursor > 0)
     if (g_currentNode->getParent()->getChild(g_cursor-1) != nullptr)
     {
@@ -111,6 +121,16 @@ void navigateUp()
 
 void navigateDown()
 {
+  if(g_currentNode->getParent()->getLabel() == String(F(">keyboard")))
+  {
+    if (g_kb_n < 9)
+    {
+      
+      g_currentNode->setLabel(String(++g_kb_n));
+      g_lcd_is_clean=false;
+    }
+  }
+
   if (g_cursor < g_currentNode->getParent()->getChildCount() - 1 and g_currentNode->getLabel() != F("omar@arduino:\\n/$_")) //nao pd ir para tras da raiz
     if (g_currentNode->getParent()->getChild(g_cursor+1) != nullptr)
     {
@@ -129,6 +149,7 @@ void selectNode()
       bool pass = false;
       if (g_currentNode->getLabel() == String(F(">enter")))
       {
+        
         if(g_pw.getTop()+1 == max_pw_lenght)
         {
           int8_t pw_3 = g_pw.pop();
@@ -150,9 +171,8 @@ void selectNode()
         pass = true;
       }
       
-      if(pass == true)
+      if(pass == true) // Avanca pro prox no
       {
-        lcd.print(F("UEEEEEE"));
         g_lcd_is_clean=false;
         g_currentNode = g_currentNode->getChild(0);
         g_menu_cursor_stack.push(g_cursor);
@@ -179,8 +199,6 @@ void selectNode()
   }
   else if (g_currentNode->getLabel() == String(F(">logout")))
   {
-    // g_currentNode = g_currentNode->getParent()->getParent();
-    // g_lcd_is_clean=false;
     navigateBack();
     navigateBack();
   }
@@ -188,23 +206,24 @@ void selectNode()
     PORTB|=(1<<PB2);//digitalWrite(pin_back_light, HIGH);
   else if (g_currentNode->getLabel() == String(F(">off")))
     PORTB&=!(1<<PB2);//digitalWrite(pin_back_light, LOW);
-  else if (g_currentNode->getLabel() == String(F(">0")))
+  else if (g_currentNode->getParent()->getLabel() == String(F(">keyboard")))
   {
     if(g_pw.getTop()+1 < max_pw_lenght)
     {
-      g_pw.push(0);
+      g_pw.push(g_kb_n);
+
 
     }
   }
-  else if (g_currentNode->getLabel() == String(F(">1")))
-  {
-    if(g_pw.getTop()+1 < max_pw_lenght)
-    {
-      g_pw.push(1);
+  // else if (g_currentNode->getLabel() == String(F(">1")))
+  // {
+  //   if(g_pw.getTop()+1 < max_pw_lenght)
+  //   {
+  //     g_pw.push(1);
 
-    }
+  //   }
 
-  }
+  // }
   // else if (g_currentNode->getLabel() == String(F(">2")))
   // {
   //   if(g_pw.getTop()+1 < max_pw_lenght)
@@ -221,7 +240,7 @@ void selectNode()
 
   //   }
   // }
-  else if (g_currentNode->getLabel() == String(F(">delete")))
+  else if (g_currentNode->getLabel() == String(F(">backspace")))
   {
     if(!g_pw.isEmpty())
     {
@@ -288,7 +307,7 @@ void displayCurrentNode()
     lcd.setCursor(pos_cursor, 0);
     lcd.print(g_cont);
   }
-  else if (g_currentNode->getParent()->getLabel() == String(F(">login")))
+  else if (g_currentNode->getParent()->getLabel() == String(F(">keyboard")) or g_currentNode->getParent()->getLabel() == String(F(">login")))
   {
     for(int8_t i=0;i<g_pw.getTop()+1;i++)
     {
