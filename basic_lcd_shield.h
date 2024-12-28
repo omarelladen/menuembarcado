@@ -1,42 +1,48 @@
 // Pin
-#define pin_D4 4
-#define pin_D5 5
-#define pin_D6 6
-#define pin_D7 7
-#define pin_RS 8
-#define pin_En 9
-#define pin_back_light 10
-#define pin_botoes A0
+#define PIN_D4 4
+#define PIN_D5 5
+#define PIN_D6 6
+#define PIN_D7 7
+#define PIN_RS 8
+#define PIN_EN 9
+#define PIN_BACK_LIGHT 10
+#define PIN_BOTOES A0
 
 // Botoes
-#define bt_NENHUM 0
-#define bt_SELECT 1
-#define bt_LEFT   2
-#define bt_UP     3
-#define bt_DOWN   4
-#define bt_RIGHT  5
+#define BT_NENHUM 0
+#define BT_SELECT 1
+#define BT_LEFT   2
+#define BT_UP     3
+#define BT_DOWN   4
+#define BT_RIGHT  5
 
-#define sel_threshold  800
-#define left_threshold 600
-#define up_threshold   400
-#define down_threshold 200
-#define right_threshold 60
+// Tensoes dos botoes do shield
+#define sel_THRESHOLD  800
+#define left_THRESHOLD 600
+#define up_THRESHOLD   400
+#define down_THRESHOLD 200
+#define right_THRESHOLD 60
 
-#define tempo_debounce 50
+#define DEBOUNCE_TIME 50
 
-#define max_pw_lenght 4
+//Pw
+#define MAX_PW_LENGTH 4
 #define PW_0 0
 #define PW_1 0
 #define PW_2 0
 #define PW_3 1
 
+
 void handleButtonPress(int8_t botao);
 // void botaoApertado(int8_t botao);
 void botaoSolto(int8_t botao);
 uint8_t checkButtonPress();
+
 void displayCurrentNode();
-void startCronometer();
+
 void navigateBack();
 void navigateDown();
-void toggleLight();
 void navigateUp();
+void selectNode();
+
+void toggleLight();

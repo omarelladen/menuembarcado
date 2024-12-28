@@ -57,9 +57,9 @@
 //  return String(buffer);// Converte o buffer para um objeto String e retorna
 // }
 
-static LiquidCrystal lcd(pin_RS,pin_En,pin_D4,pin_D5,pin_D6,pin_D7);
+static LiquidCrystal lcd(PIN_RS,PIN_EN,PIN_D4,PIN_D5,PIN_D6,PIN_D7);
 static Node* g_currentNode = g_currentNode->initializeTree();
-static int8_t g_estadoBotaoAnt=bt_NENHUM;
+static int8_t g_estadoBotaoAnt=BT_NENHUM;
 static bool cronometer_is_running=false;
 static unsigned long g_bt_delay=0;
 static Cronometer g_cronometer;
@@ -76,20 +76,21 @@ void setup()
   //Serial.begin(9600);
 
   // Luz
-  DDRB|=(1<<DDB2);//pinMode(pin_back_light, OUTPUT);
-  PORTB|=(1<<PB2);//digitalWrite(pin_back_light, HIGH);
+  DDRB|=(1<<DDB2);//pinMode(PIN_BACK_LIGHT, OUTPUT);
+  PORTB|=(1<<PB2);//digitalWrite(PIN_BACK_LIGHT, HIGH);
 }
 
 void toggleLight()
 {
-  if (PORTB & (1 << PB2))// PB2 = pino digital 10 (pin_back_light)
-    PORTB&=!(1<<PB2);//digitalWrite(pin_back_light, LOW);
+  if (PORTB & (1 << PB2))// PB2 = pino digital 10 (PIN_BACK_LIGHT)
+    PORTB&=!(1<<PB2);//digitalWrite(PIN_BACK_LIGHT, LOW);
   else
-    PORTB|=(1<<PB2);//digitalWrite(pin_back_light, HIGH);
+    PORTB|=(1<<PB2);//digitalWrite(PIN_BACK_LIGHT, HIGH);
 }
 
 void navigateBack()
 {
+  //Volta pro no anterior
   if (g_currentNode->getParent() != nullptr)
   {
     g_lcd_is_clean=false;
@@ -100,18 +101,19 @@ void navigateBack()
 
 void navigateUp()
 {
+  // Navegacao de teclado para senha
   if(g_currentNode->getParent()->getLabel() == String(F(">keyboard")))
   {
     int8_t num = g_currentNode->getLabel()[0] - '0';
     if (num > 0)
     {
-      
       g_currentNode->setLabel(String(num-1));
       g_lcd_is_clean=false;
     }
   }
 
-  if (g_cursor > 0)
+  // Navegacao entre nos
+  else if (g_cursor > 0)
     if (g_currentNode->getParent()->getChild(g_cursor-1) != nullptr)
     {
       g_lcd_is_clean=false;
@@ -121,18 +123,19 @@ void navigateUp()
 
 void navigateDown()
 {
+  // Navegacao de teclado para senha
   if(g_currentNode->getParent()->getLabel() == String(F(">keyboard")))
   {
     int8_t num = g_currentNode->getLabel()[0] - '0';
     if (num < 9)
     {
-      
       g_currentNode->setLabel(String(num+1));
       g_lcd_is_clean=false;
     }
   }
 
-  if (g_cursor < g_currentNode->getParent()->getChildCount() - 1 and g_currentNode->getLabel() != F("omar@arduino:\\n/$_")) //nao pd ir para tras da raiz
+  // Navegacao entre nos
+  else if (g_cursor < g_currentNode->getParent()->getChildCount() - 1 and g_currentNode->getLabel() != F("omar@arduino:\\n/$_")) //nao pd ir para tras da raiz
     if (g_currentNode->getParent()->getChild(g_cursor+1) != nullptr)
     {
       g_lcd_is_clean=false;
@@ -142,16 +145,17 @@ void navigateDown()
 
 void selectNode()
 {
-  // Navegacao
   if (g_currentNode->getChildCount() > 0)
   {
     if (g_currentNode->getChild(0) != nullptr)
     {
       bool pass = false;
+
+      // Verificacao de senha
       if (g_currentNode->getLabel() == String(F(">enter")))
       {
         
-        if(g_pw.getTop()+1 == max_pw_lenght)
+        if(g_pw.getTop()+1 == MAX_PW_LENGTH)
         {
           int8_t pw_3 = g_pw.pop();
           int8_t pw_2 = g_pw.pop();
@@ -162,17 +166,16 @@ void selectNode()
              pw_1 == PW_1 and
              pw_2 == PW_2 and
              pw_3 == PW_3)
-          {
             pass = true;
-          }
         }
       }
+
+      // Navegacao normal
       else
-      {
         pass = true;
-      }
       
-      if(pass == true) // Avanca pro prox no
+      // Navega entre nos
+      if(pass == true)
       {
         g_lcd_is_clean=false;
         g_currentNode = g_currentNode->getChild(0);
@@ -204,42 +207,17 @@ void selectNode()
     navigateBack();
   }
   else if (g_currentNode->getLabel() == String(F(">on")))
-    PORTB|=(1<<PB2);//digitalWrite(pin_back_light, HIGH);
+    PORTB|=(1<<PB2);//digitalWrite(PIN_BACK_LIGHT, HIGH);
   else if (g_currentNode->getLabel() == String(F(">off")))
-    PORTB&=!(1<<PB2);//digitalWrite(pin_back_light, LOW);
+    PORTB&=!(1<<PB2);//digitalWrite(PIN_BACK_LIGHT, LOW);
   else if (g_currentNode->getParent()->getLabel() == String(F(">keyboard")))
   {
-    if(g_pw.getTop()+1 < max_pw_lenght)
+    if(g_pw.getTop()+1 < MAX_PW_LENGTH)
     {
       int8_t num = g_currentNode->getLabel()[0] - '0';
       g_pw.push(num);
     }
   }
-  // else if (g_currentNode->getLabel() == String(F(">1")))
-  // {
-  //   if(g_pw.getTop()+1 < max_pw_lenght)
-  //   {
-  //     g_pw.push(1);
-
-  //   }
-
-  // }
-  // else if (g_currentNode->getLabel() == String(F(">2")))
-  // {
-  //   if(g_pw.getTop()+1 < max_pw_lenght)
-  //   {
-  //     g_pw.push(2);
-
-  //   }
-  // }
-  // else if (g_currentNode->getLabel() == String(F(">3")))
-  // {
-  //   if(g_pw.getTop()+1 < max_pw_lenght)
-  //   {
-  //     g_pw.push(3);
-
-  //   }
-  // }
   else if (g_currentNode->getLabel() == String(F(">backspace")))
   {
     if(!g_pw.isEmpty())
@@ -268,10 +246,8 @@ void displayCurrentNode()
   {
       String line1 = g_currentNode->getLabel().substring(0, loc_bar_n);// Parte antes do \n
       String line2 = g_currentNode->getLabel().substring(loc_bar_n+2, i);// Parte depois do \n
-
       lcd.setCursor(0, 0);
       lcd.print(line1);
-
       lcd.setCursor(0, 1);
       lcd.print(line2);
   }
@@ -322,17 +298,17 @@ void handleButtonPress(int8_t botao)
   g_lcd_is_clean=true;
 
   //Quando o botao for apertado ou solto
-  if ((millis() - g_bt_delay) > tempo_debounce)
+  if ((millis() - g_bt_delay) > DEBOUNCE_TIME)
   {
     // Apertado
-    // if ((botao != bt_NENHUM) and (g_estadoBotaoAnt == bt_NENHUM) )
+    // if ((botao != BT_NENHUM) and (g_estadoBotaoAnt == BT_NENHUM) )
     // {
     //   botaoApertado(botao); 
     //   g_bt_delay = millis();
     // }
 
     // Solto
-    if ((botao == bt_NENHUM) and (g_estadoBotaoAnt != bt_NENHUM) )
+    if ((botao == BT_NENHUM) and (g_estadoBotaoAnt != BT_NENHUM) )
     {
       botaoSolto(g_estadoBotaoAnt); 
       g_bt_delay = millis();
@@ -351,35 +327,35 @@ void botaoSolto(int8_t botao)
 {
   //Quando um botão for solto
 
-  if (botao == bt_DOWN)
+  if (botao == BT_DOWN)
     navigateDown();
-  else if (botao == bt_UP)
+  else if (botao == BT_UP)
     navigateUp();
-  else if (botao == bt_SELECT)
+  else if (botao == BT_SELECT)
     selectNode();
-  else if (botao == bt_LEFT)
+  else if (botao == BT_LEFT)
     navigateBack();
-  else if (botao == bt_RIGHT)
+  else if (botao == BT_RIGHT)
     toggleLight();
 }
 
 uint8_t checkButtonPress()
 {
-  int16_t val_botoes = analogRead(pin_botoes);
+  int16_t val_botoes = analogRead(PIN_BOTOES);
 
   int8_t botao = -1;
-  if ((val_botoes < sel_threshold) and (val_botoes >= left_threshold))
-    botao = (bt_SELECT);
-  else if ((val_botoes < left_threshold) and (val_botoes >= up_threshold))
-    botao = (bt_LEFT);
-  else if ((val_botoes < up_threshold) and (val_botoes >= down_threshold))
-    botao = (bt_DOWN);
-  else if ((val_botoes < down_threshold) and (val_botoes >= right_threshold))
-    botao = (bt_UP);
-  else if  (val_botoes < right_threshold)
-    botao = (bt_RIGHT);
+  if ((val_botoes < sel_THRESHOLD) and (val_botoes >= left_THRESHOLD))
+    botao = (BT_SELECT);
+  else if ((val_botoes < left_THRESHOLD) and (val_botoes >= up_THRESHOLD))
+    botao = (BT_LEFT);
+  else if ((val_botoes < up_THRESHOLD) and (val_botoes >= down_THRESHOLD))
+    botao = (BT_DOWN);
+  else if ((val_botoes < down_THRESHOLD) and (val_botoes >= right_THRESHOLD))
+    botao = (BT_UP);
+  else if  (val_botoes < right_THRESHOLD)
+    botao = (BT_RIGHT);
   else 
-    botao = (bt_NENHUM);
+    botao = (BT_NENHUM);
 
   return botao;
 }
