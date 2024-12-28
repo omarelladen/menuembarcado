@@ -68,7 +68,6 @@ static int16_t g_cont=0;
 static int8_t g_cursor=0;
 static bool g_lcd_is_clean=false;
 static Stack g_pw;//se n for global precisaria alocar array?
-static int8_t g_kb_n=0;
 
 void setup()
 {
@@ -103,10 +102,11 @@ void navigateUp()
 {
   if(g_currentNode->getParent()->getLabel() == String(F(">keyboard")))
   {
-    if (g_kb_n > 0)
+    int8_t num = g_currentNode->getLabel()[0] - '0';
+    if (num > 0)
     {
       
-      g_currentNode->setLabel(String(--g_kb_n));
+      g_currentNode->setLabel(String(num-1));
       g_lcd_is_clean=false;
     }
   }
@@ -123,10 +123,11 @@ void navigateDown()
 {
   if(g_currentNode->getParent()->getLabel() == String(F(">keyboard")))
   {
-    if (g_kb_n < 9)
+    int8_t num = g_currentNode->getLabel()[0] - '0';
+    if (num < 9)
     {
       
-      g_currentNode->setLabel(String(++g_kb_n));
+      g_currentNode->setLabel(String(num+1));
       g_lcd_is_clean=false;
     }
   }
@@ -210,9 +211,8 @@ void selectNode()
   {
     if(g_pw.getTop()+1 < max_pw_lenght)
     {
-      g_pw.push(g_kb_n);
-
-
+      int8_t num = g_currentNode->getLabel()[0] - '0';
+      g_pw.push(num);
     }
   }
   // else if (g_currentNode->getLabel() == String(F(">1")))
