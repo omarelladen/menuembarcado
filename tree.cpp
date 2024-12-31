@@ -1,7 +1,9 @@
 #include "tree.h"
 
 Node::Node(String label):
-label(label), parent(nullptr), childCount(0)
+label(label),
+parent(nullptr),
+childCount(0)
 {
   for(int i=0; i<N_MAX_CHILD; i++)
     children[i] = nullptr;

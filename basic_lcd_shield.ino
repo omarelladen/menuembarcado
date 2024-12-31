@@ -1,47 +1,3 @@
-//cartao sd
-//cronometro e timer - manter printado enquanto mexe no menu (OK)
-//sinal sonoro
-//contador simples (OK)
-//senha (OK - simples)
-//logout (OK)
-//turnoff (OK)
-//info firmware/kernel = prog c++ arduino ide by Omar El Laden v0.0.0 (OK)
-//ver outras melhorias de RAM
-//monitorar sensores
-//aproveitar o bt R (OK - toggle light)
-//var byte a byte
-//printar na 2a linha o filho[i+1] se existir (OK)
-//colocar func pra calcular o tempo durante o menu de timer apos seu star, e func pra pausar e reiniciar diretamente
-//logs em arq
-//melhorar g_var da linguagem
-//melhorar div de arq (como separar em cpps)
-//melhorar class/struct (OK-indo)
-//melhorar ger grafico, de eventos e de estados
-//criar classe t pra ter metodo reset() e count() (q conta por si em vez de por fora) (OK)
-//ver destrutoras, ptr em vez de global(?)
-//stop funciona implicitamente com gambiarra, e tmb pausa qnd da um down soq add +1seg -> agr da +1 so qnd inicia ou reinicia, e basta ir pra baixo pra pausar (precisa melhorar pra ter qnd for pra baixo continuar e pausar so qnd dar select no pause)
-//timer down
-//colocar as funct de cronometro na classe (OK)
-//so reprintar o numer o do count (mudar chamada do displayCurrentNode)
-//tratar retorno do push e pop da stack
-//separar melhor em funcoes e criar classes pras principais n ficarem soltas
-//melhorar classes, como private/public
-//VER BEM separacao das funcoes de cada menu e o WHILE ruim do cronometro; RTOS firmware; prints (ger graf) (OK-bem melhor)
-//checar se nullptr (OK - pros children, Node parent e Node child apenas nao realiza a tarefa se for nullptr)
-//colocar str usadas mais de uma vez em var
-//ver uso de new pro Node, rever nome e classe
-//comunicacao usb
-//calculadora
-//melhorar o ">"
-//rever arrays
-//tirar senha de stack talvez
-//hash pra senha
-//criptografia
-
-
-//#include <Arduino.h>
-//#include <LiquidCrystal.h>
-//#include <stdint.h>
 //#include <avr/pgmspace.h>
 #include "basic_lcd_shield.h"
 #include "cronometer.h"
@@ -57,29 +13,34 @@
 //  return String(buffer);// Converte o buffer para um objeto String e retorna
 // }
 
-static LiquidCrystal lcd(PIN_RS,PIN_EN,PIN_D4,PIN_D5,PIN_D6,PIN_D7);
-static Node* g_currentNode = g_currentNode->initializeTree();
-static int8_t g_estadoBotaoAnt=BT_NENHUM;
-static bool cronometer_is_running=false;
-static unsigned long g_bt_delay=0;
-static Cronometer g_cronometer;
-static Stack g_menu_cursor_stack;
-static int16_t g_cont=0;
-static int8_t g_cursor=0;
-static bool g_lcd_is_clean=false;
-static Stack g_pw;//se n for global precisaria alocar array?
 
+///add mais classes
+
+///buscar ter menos var global
+static LiquidCrystal lcd(PIN_RS,PIN_EN,PIN_D4,PIN_D5,PIN_D6,PIN_D7);///GGr
+static Node* g_currentNode = g_currentNode->initializeTree();///GEs
+static int8_t g_estadoBotaoAnt=BT_NENHUM;///GEv
+static unsigned long g_bt_delay=0;///GEv
+static Cronometer g_cronometer;///C
+static Stack g_menu_cursor_stack;///GEs
+static int16_t g_cont=0;///C
+static int8_t g_cursor=0;///GEs
+static bool g_lcd_is_clean=false;///GGr
+static Stack g_pw;//C //se n for global precisaria alocar array?
+
+///
 void setup()
 {
   lcd.begin(16, 2);
 
-  //Serial.begin(9600);
-
   // Luz
   DDRB|=(1<<DDB2);//pinMode(PIN_BACK_LIGHT, OUTPUT);
   PORTB|=(1<<PB2);//digitalWrite(PIN_BACK_LIGHT, HIGH);
+
+  //Serial.begin(9600);
 }
 
+//OK, mas desacoplar
 void toggleLight()
 {
   if (PORTB & (1 << PB2))// PB2 = pino digital 10 (PIN_BACK_LIGHT)
@@ -88,6 +49,7 @@ void toggleLight()
     PORTB|=(1<<PB2);//digitalWrite(PIN_BACK_LIGHT, HIGH);
 }
 
+///OK por enquanto
 void navigateBack()
 {
   //Volta pro no anterior
@@ -99,6 +61,7 @@ void navigateBack()
   } 
 }
 
+//desacoplar
 void navigateUp()
 {
   // Navegacao de teclado para senha
@@ -114,13 +77,16 @@ void navigateUp()
 
   // Navegacao entre nos
   else if (g_cursor > 0)
+  {
     if (g_currentNode->getParent()->getChild(g_cursor-1) != nullptr)
     {
       g_lcd_is_clean=false;
       g_currentNode = g_currentNode->getParent()->getChild(--g_cursor);
     }
+  }
 }
 
+///desacoplar
 void navigateDown()
 {
   // Navegacao de teclado para senha
@@ -143,6 +109,49 @@ void navigateDown()
     }
 }
 
+void executeButton()
+{
+  // Funcionalidades (sem filhos)
+  if (g_currentNode->getLabel() == String(F(">up")))
+    g_cont++;
+  else if (g_currentNode->getLabel() == String(F(">down")))
+    g_cont--;
+  else if (g_currentNode->getLabel() == String(F(">reset")) and g_currentNode->getParent()->getLabel() == String(F(">counter")))
+    g_cont=0;
+  else if (g_currentNode->getLabel() == String(F(">start")))
+    g_cronometer.setCronometerIsRunning(true);
+  else if (g_currentNode->getLabel() == String(F(">pause")))
+    g_cronometer.setCronometerIsRunning(false);
+  else if (g_currentNode->getLabel() == String(F(">reset")) and g_currentNode->getParent()->getLabel() == String(F(">cronometer")))
+    g_cronometer.reset();
+  else if (g_currentNode->getLabel() == String(F(">logout")))
+  {
+    navigateBack();
+    navigateBack();
+  }
+  else if (g_currentNode->getLabel() == String(F(">on")))
+    PORTB|=(1<<PB2);//digitalWrite(PIN_BACK_LIGHT, HIGH);
+  else if (g_currentNode->getLabel() == String(F(">off")))
+    PORTB&=!(1<<PB2);//digitalWrite(PIN_BACK_LIGHT, LOW);
+  else if (g_currentNode->getParent()->getLabel() == String(F(">keyboard")))
+  {
+    if(g_pw.getTop()+1 < MAX_PW_LENGTH)
+    {
+      int8_t num = g_currentNode->getLabel()[0] - '0';
+      g_pw.push(num);
+    }
+  }
+  else if (g_currentNode->getLabel() == String(F(">backspace")))
+  {
+    if(!g_pw.isEmpty())
+    {
+      g_pw.pop();
+      lcd.clear();
+    }
+  }
+}
+
+///desacoplar
 void selectNode()
 {
   if (g_currentNode->getChildCount() > 0)
@@ -174,6 +183,7 @@ void selectNode()
       else
         pass = true;
       
+
       // Navega entre nos
       if(pass == true)
       {
@@ -185,53 +195,18 @@ void selectNode()
     }      
   } 
 
-  // Funcionalidades (sem filhos)
-  else if (g_currentNode->getLabel() == String(F(">up")))
-    g_cont++;
-  else if (g_currentNode->getLabel() == String(F(">down")))
-    g_cont--;
-  else if (g_currentNode->getLabel() == String(F(">reset")) and g_currentNode->getParent()->getLabel() == String(F(">counter")))
-    g_cont=0;
-  else if (g_currentNode->getLabel() == String(F(">start")))
-    cronometer_is_running = true;
-  else if (g_currentNode->getLabel() == String(F(">pause")))
-    cronometer_is_running = false;
-  else if (g_currentNode->getLabel() == String(F(">reset")) and g_currentNode->getParent()->getLabel() == String(F(">cronometer")))
-  {
-    g_cronometer.reset();
-    cronometer_is_running = false;
-  }
-  else if (g_currentNode->getLabel() == String(F(">logout")))
-  {
-    navigateBack();
-    navigateBack();
-  }
-  else if (g_currentNode->getLabel() == String(F(">on")))
-    PORTB|=(1<<PB2);//digitalWrite(PIN_BACK_LIGHT, HIGH);
-  else if (g_currentNode->getLabel() == String(F(">off")))
-    PORTB&=!(1<<PB2);//digitalWrite(PIN_BACK_LIGHT, LOW);
-  else if (g_currentNode->getParent()->getLabel() == String(F(">keyboard")))
-  {
-    if(g_pw.getTop()+1 < MAX_PW_LENGTH)
-    {
-      int8_t num = g_currentNode->getLabel()[0] - '0';
-      g_pw.push(num);
-    }
-  }
-  else if (g_currentNode->getLabel() == String(F(">backspace")))
-  {
-    if(!g_pw.isEmpty())
-    {
-      g_pw.pop();
-      lcd.clear();
-    }
-  }
+  else
+    executeButton();
 }
 
+///desacoplar
 void displayCurrentNode()
 {
   if (g_lcd_is_clean == false)
+  {
     lcd.clear();
+    g_lcd_is_clean = true;
+  }
 
   String text = g_currentNode->getLabel();
   
@@ -259,6 +234,7 @@ void displayCurrentNode()
 
       // Proxima opcao, se existir
       if (g_currentNode->getParent()->getChildCount() > g_cursor+1)
+      {
         if (g_currentNode->getParent()->getChild(g_cursor+1) != nullptr)
         {
           String label = g_currentNode->getParent()->getChild(g_cursor+1)->getLabel();
@@ -266,6 +242,7 @@ void displayCurrentNode()
           lcd.setCursor(0, 1);
           lcd.print(label); 
         }
+      }
   }
 
   // Prints de conteudos especificos de menus
@@ -293,9 +270,33 @@ void displayCurrentNode()
   }
 }
 
+
+// void botaoApertado(int8_t botao)
+// {
+//   //Quando um botão for apertado
+
+// }
+
+///OK
+void botaoSolto(int8_t botao)
+{
+  //Quando um botão for solto
+
+  if (botao == BT_DOWN)
+    navigateDown();
+  else if (botao == BT_UP)
+    navigateUp();
+  else if (botao == BT_SELECT)
+    selectNode();
+  else if (botao == BT_LEFT)
+    navigateBack();
+  else if (botao == BT_RIGHT)
+    toggleLight();
+}
+
+//OK
 void handleButtonPress(int8_t botao)
 {
-  g_lcd_is_clean=true;
 
   //Quando o botao for apertado ou solto
   if ((millis() - g_bt_delay) > DEBOUNCE_TIME)
@@ -317,42 +318,21 @@ void handleButtonPress(int8_t botao)
   g_estadoBotaoAnt = botao;
 }
 
-// void botaoApertado(int8_t botao)
-// {
-//   //Quando um botão for apertado
-
-// }
-
-void botaoSolto(int8_t botao)
-{
-  //Quando um botão for solto
-
-  if (botao == BT_DOWN)
-    navigateDown();
-  else if (botao == BT_UP)
-    navigateUp();
-  else if (botao == BT_SELECT)
-    selectNode();
-  else if (botao == BT_LEFT)
-    navigateBack();
-  else if (botao == BT_RIGHT)
-    toggleLight();
-}
-
+///OK
 uint8_t checkButtonPress()
 {
   int16_t val_botoes = analogRead(PIN_BOTOES);
 
   int8_t botao = -1;
-  if ((val_botoes < sel_THRESHOLD) and (val_botoes >= left_THRESHOLD))
+  if ((val_botoes < SEL_THRESHOLD) and (val_botoes >= LEFT_THRESHOLD))
     botao = (BT_SELECT);
-  else if ((val_botoes < left_THRESHOLD) and (val_botoes >= up_THRESHOLD))
+  else if ((val_botoes < LEFT_THRESHOLD) and (val_botoes >= UP_THRESHOLD))
     botao = (BT_LEFT);
-  else if ((val_botoes < up_THRESHOLD) and (val_botoes >= down_THRESHOLD))
+  else if ((val_botoes < UP_THRESHOLD) and (val_botoes >= DOWN_THRESHOLD))
     botao = (BT_DOWN);
-  else if ((val_botoes < down_THRESHOLD) and (val_botoes >= right_THRESHOLD))
+  else if ((val_botoes < DOWN_THRESHOLD) and (val_botoes >= RIGHT_THRESHOLD))
     botao = (BT_UP);
-  else if  (val_botoes < right_THRESHOLD)
+  else if  (val_botoes < RIGHT_THRESHOLD)
     botao = (BT_RIGHT);
   else 
     botao = (BT_NENHUM);
@@ -360,12 +340,16 @@ uint8_t checkButtonPress()
   return botao;
 }
 
+///talvez precisa de mais func aqui ao desacoplar
 void loop()
 {
+  // Gerenciamento Grafico
   displayCurrentNode();
 
-  handleButtonPress(checkButtonPress());
-  
-  if (cronometer_is_running)
-    g_cronometer.updateCronometer();
+  // Gerenciamento de Eventos
+  uint8_t bt_pressed = checkButtonPress();
+  handleButtonPress(bt_pressed); // notifica Gerenciador de Estados
+
+  //Estado executado de forma acoplada
+  g_cronometer.execute();
 }

@@ -1,5 +1,5 @@
 #pragma once
-#include <Arduino.h>
+#include <stdint.h>
 
 #define MAX_STACK_SIZE 7
 
@@ -10,6 +10,7 @@ class Stack {
 
   public:
     Stack();
+    ~Stack();
     int8_t getTop() const;
     bool isEmpty() const;
     bool isFull() const;

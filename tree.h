@@ -1,5 +1,5 @@
 #pragma once
-#include <Arduino.h>
+#include <WString.h>
 
 #define N_MAX_CHILD 7
 

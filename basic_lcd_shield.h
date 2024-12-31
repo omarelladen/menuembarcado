@@ -16,12 +16,12 @@
 #define BT_DOWN   4
 #define BT_RIGHT  5
 
-// Tensoes dos botoes do shield
-#define sel_THRESHOLD  800
-#define left_THRESHOLD 600
-#define up_THRESHOLD   400
-#define down_THRESHOLD 200
-#define right_THRESHOLD 60
+// Tensoes dos botoes
+#define SEL_THRESHOLD  800
+#define LEFT_THRESHOLD 600
+#define UP_THRESHOLD   400
+#define DOWN_THRESHOLD 200
+#define RIGHT_THRESHOLD 60
 
 #define DEBOUNCE_TIME 50
 
@@ -37,12 +37,10 @@ void handleButtonPress(int8_t botao);
 // void botaoApertado(int8_t botao);
 void botaoSolto(int8_t botao);
 uint8_t checkButtonPress();
-
 void displayCurrentNode();
-
 void navigateBack();
 void navigateDown();
 void navigateUp();
 void selectNode();
-
 void toggleLight();
+void executeButton();

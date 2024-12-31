@@ -5,6 +5,10 @@ top(-1)// Pilha comeca vazia
 {
 }
 
+Stack::~Stack()
+{
+}
+
 int8_t Stack::getTop() const {return top;}    
 
 bool Stack::isEmpty() const {return top == -1;}

@@ -1,8 +1,16 @@
 #include "cronometer.h"
 
 Cronometer::Cronometer():
-s(0), m(0), h(0)
+s(0),
+m(0),
+h(0),
+cronometer_is_running(false)
 {
+}
+
+Cronometer::~Cronometer()
+{
+  cronometer_is_running=false;
 }
 
 uint8_t Cronometer::getS() const {return s;}
@@ -11,9 +19,16 @@ uint8_t Cronometer::getM() const {return m;}
 
 uint8_t Cronometer::getH() const {return h;}
 
+void Cronometer::setCronometerIsRunning(bool value)
+{
+  cronometer_is_running = value;
+}
+
+
 void Cronometer::reset()
 {
   s=m=h=0;
+  cronometer_is_running=false;
 }
 
 void Cronometer::sec_count()
@@ -81,4 +96,10 @@ void Cronometer::updateCronometer()
     previousMillis = currentMillis;
     sec_count();
   }
+}
+
+void Cronometer::execute()
+{
+  if (cronometer_is_running)
+    updateCronometer();
 }
