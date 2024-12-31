@@ -6,24 +6,6 @@
 #define PIN_RS 8
 #define PIN_EN 9
 #define PIN_BACK_LIGHT 10
-#define PIN_BOTOES A0
-
-// Botoes
-#define BT_NENHUM 0
-#define BT_SELECT 1
-#define BT_LEFT   2
-#define BT_UP     3
-#define BT_DOWN   4
-#define BT_RIGHT  5
-
-// Tensoes dos botoes
-#define SEL_THRESHOLD  800
-#define LEFT_THRESHOLD 600
-#define UP_THRESHOLD   400
-#define DOWN_THRESHOLD 200
-#define RIGHT_THRESHOLD 60
-
-#define DEBOUNCE_TIME 50
 
 //Pw
 #define MAX_PW_LENGTH 4

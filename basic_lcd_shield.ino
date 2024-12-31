@@ -4,6 +4,8 @@
 #include "stack.h"
 #include "tree.h"
 
+#include "EventManager.h"
+
 // const char         str_root[] = "omar@arduino:\\n/$_"
 // const char PROGMEM str_root[] = "omar@arduino:\\n/$_";
 // String readProgmemString(const char* progmemStr) {
@@ -27,6 +29,8 @@ static int16_t g_cont=0;///C
 static int8_t g_cursor=0;///GEs
 static bool g_lcd_is_clean=false;///GGr
 static Stack g_pw;//C //se n for global precisaria alocar array?
+
+static EventManager ger_eventos;
 
 ///
 void setup()
@@ -294,52 +298,6 @@ void botaoSolto(int8_t botao)
     toggleLight();
 }
 
-//OK
-void handleButtonPress(int8_t botao)
-{
-
-  //Quando o botao for apertado ou solto
-  if ((millis() - g_bt_delay) > DEBOUNCE_TIME)
-  {
-    // Apertado
-    // if ((botao != BT_NENHUM) and (g_estadoBotaoAnt == BT_NENHUM) )
-    // {
-    //   botaoApertado(botao); 
-    //   g_bt_delay = millis();
-    // }
-
-    // Solto
-    if ((botao == BT_NENHUM) and (g_estadoBotaoAnt != BT_NENHUM) )
-    {
-      botaoSolto(g_estadoBotaoAnt); 
-      g_bt_delay = millis();
-    }
-  }
-  g_estadoBotaoAnt = botao;
-}
-
-///OK
-uint8_t checkButtonPress()
-{
-  int16_t val_botoes = analogRead(PIN_BOTOES);
-
-  int8_t botao = -1;
-  if ((val_botoes < SEL_THRESHOLD) and (val_botoes >= LEFT_THRESHOLD))
-    botao = (BT_SELECT);
-  else if ((val_botoes < LEFT_THRESHOLD) and (val_botoes >= UP_THRESHOLD))
-    botao = (BT_LEFT);
-  else if ((val_botoes < UP_THRESHOLD) and (val_botoes >= DOWN_THRESHOLD))
-    botao = (BT_DOWN);
-  else if ((val_botoes < DOWN_THRESHOLD) and (val_botoes >= RIGHT_THRESHOLD))
-    botao = (BT_UP);
-  else if  (val_botoes < RIGHT_THRESHOLD)
-    botao = (BT_RIGHT);
-  else 
-    botao = (BT_NENHUM);
-
-  return botao;
-}
-
 ///talvez precisa de mais func aqui ao desacoplar
 void loop()
 {
@@ -347,8 +305,9 @@ void loop()
   displayCurrentNode();
 
   // Gerenciamento de Eventos
-  uint8_t bt_pressed = checkButtonPress();
-  handleButtonPress(bt_pressed); // notifica Gerenciador de Estados
+  // uint8_t bt_pressed = checkButtonPress();
+  // handleButtonPress(bt_pressed); // notifica Gerenciador de Estados
+  ger_eventos.execute();
 
   //Estado executado de forma acoplada
   g_cronometer.execute();
