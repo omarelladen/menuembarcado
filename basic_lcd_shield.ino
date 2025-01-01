@@ -21,12 +21,8 @@
 ///buscar ter menos var global
 static LiquidCrystal lcd(PIN_RS,PIN_EN,PIN_D4,PIN_D5,PIN_D6,PIN_D7);///GGr
 static Node* g_currentNode = g_currentNode->initializeTree();///GEs
-static int8_t g_estadoBotaoAnt=BT_NENHUM;///GEv
-static unsigned long g_bt_delay=0;///GEv
 static Cronometer g_cronometer;///C
-static Stack g_menu_cursor_stack;///GEs
 static int16_t g_cont=0;///C
-static int8_t g_cursor=0;///GEs
 static bool g_lcd_is_clean=false;///GGr
 static Stack g_pw;//C //se n for global precisaria alocar array?
 
@@ -61,7 +57,7 @@ void navigateBack()
   {
     g_lcd_is_clean=false;
     g_currentNode = g_currentNode->getParent();
-    g_cursor = g_menu_cursor_stack.pop();
+    Node::setCursor(Node::getMenuCursorStack().pop());
   } 
 }
 
@@ -80,12 +76,13 @@ void navigateUp()
   }
 
   // Navegacao entre nos
-  else if (g_cursor > 0)
+  else if (Node::getCursor() > 0)
   {
-    if (g_currentNode->getParent()->getChild(g_cursor-1) != nullptr)
+    if (g_currentNode->getParent()->getChild(Node::getCursor()-1) != nullptr)
     {
       g_lcd_is_clean=false;
-      g_currentNode = g_currentNode->getParent()->getChild(--g_cursor);
+      Node::setCursor(Node::getCursor()-1);
+      g_currentNode = g_currentNode->getParent()->getChild(Node::getCursor());
     }
   }
 }
@@ -105,11 +102,12 @@ void navigateDown()
   }
 
   // Navegacao entre nos
-  else if (g_cursor < g_currentNode->getParent()->getChildCount() - 1 and g_currentNode->getLabel() != F("omar@arduino:\\n/$_")) //nao pd ir para tras da raiz
-    if (g_currentNode->getParent()->getChild(g_cursor+1) != nullptr)
+  else if (Node::getCursor() < g_currentNode->getParent()->getChildCount() - 1 and g_currentNode->getLabel() != F("omar@arduino:\\n/$_")) //nao pd ir para tras da raiz
+    if (g_currentNode->getParent()->getChild(Node::getCursor()+1) != nullptr)
     {
       g_lcd_is_clean=false;
-      g_currentNode = g_currentNode->getParent()->getChild(++g_cursor);
+      Node::setCursor(Node::getCursor()+1);
+      g_currentNode = g_currentNode->getParent()->getChild(Node::getCursor());
     }
 }
 
@@ -193,8 +191,8 @@ void selectNode()
       {
         g_lcd_is_clean=false;
         g_currentNode = g_currentNode->getChild(0);
-        g_menu_cursor_stack.push(g_cursor);
-        g_cursor = 0;
+        Node::getMenuCursorStack().push(Node::getCursor());
+        Node::setCursor(0);
       }
     }      
   } 
@@ -237,11 +235,11 @@ void displayCurrentNode()
       lcd.print(g_currentNode->getLabel());
 
       // Proxima opcao, se existir
-      if (g_currentNode->getParent()->getChildCount() > g_cursor+1)
+      if (g_currentNode->getParent()->getChildCount() > Node::getCursor()+1)
       {
-        if (g_currentNode->getParent()->getChild(g_cursor+1) != nullptr)
+        if (g_currentNode->getParent()->getChild(Node::getCursor()+1) != nullptr)
         {
-          String label = g_currentNode->getParent()->getChild(g_cursor+1)->getLabel();
+          String label = g_currentNode->getParent()->getChild(Node::getCursor()+1)->getLabel();
           label.setCharAt(0, ' ');       
           lcd.setCursor(0, 1);
           lcd.print(label); 

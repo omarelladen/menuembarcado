@@ -1,9 +1,14 @@
 #include "tree.h"
 
+Stack Node::menu_cursor_stack;
+int8_t Node::cursor=0;
+
 Node::Node(String label):
 label(label),
-parent(nullptr),
-childCount(0)
+childCount(0),
+parent(nullptr)
+// next_sibling(nullptr),
+// previous_sibling(nullptr)
 {
   for(int i=0; i<N_MAX_CHILD; i++)
     children[i] = nullptr;
@@ -22,6 +27,16 @@ Node::~Node()
     childCount = 0;
 }
 
+Stack& Node::getMenuCursorStack() {return menu_cursor_stack;}
+
+int8_t Node::getCursor() {return cursor;}
+
+void Node::setCursor(int8_t _cursor)
+{
+  cursor = _cursor;
+}
+
+
 void Node::setLabel(String new_label) {label = new_label;}
 
 String Node::getLabel() const {return label;}
@@ -32,14 +47,25 @@ int8_t Node::getChildCount() const {return childCount;}
 
 Node* Node::getParent() const {return parent;}
 
-void Node::addChild(Node* parent, Node* child)
+void Node::addChild(Node* child)
 {
-  if (parent != nullptr and child != nullptr)
+  if (child != nullptr)
   {
-    parent->children[(parent->childCount)++] = child;
-    child->parent = parent;
+    children[childCount++] = child;
+    child->parent = this;
   }
 }
+
+// void Node::setPreviousSibling(Node* prev_sib)
+// {
+//   if(prev_sib != nullptr)
+//     previous_sibling = prev_sib;
+// }
+// void Node::setNextSibling(Node* next_sib)
+// {
+//   if(next_sib != nullptr)
+//     next_sibling = next_sib;
+// }
 
 Node* Node::initializeTree()
 {
@@ -47,64 +73,65 @@ Node* Node::initializeTree()
 
 
   Node* login = new Node(F(">login"));
-  addChild(root, login);
+  root->addChild(login);
 
   Node* keyboard = new Node(F(">keyboard"));
-  addChild(login, keyboard);
-  addChild(keyboard, new Node(F("0")));
-  addChild(login, new Node(F(">backspace")));
+  login->addChild(keyboard);
+  keyboard->addChild(new Node(F("0")));
+  login->addChild(new Node(F(">backspace")));
   Node* enter = new Node(F(">enter"));
-  addChild(login, enter);
+  login->addChild(enter);
 
 
 
   Node* light = new Node(F(">lcd light"));
-  addChild(root, light);
-  addChild(light, new Node(F(">on")));
-  addChild(light, new Node(F(">off")));
+
+  root->addChild(light);
+  light->addChild(new Node(F(">on")));
+  light->addChild(new Node(F(">off")));
 
 
   Node* cronometer = new Node(F(">cronometer"));
-  addChild(enter, cronometer);
-  addChild(cronometer, new Node(F(">start")));
-  addChild(cronometer, new Node(F(">pause")));
-  addChild(cronometer, new Node(F(">reset")));
+  enter->addChild(cronometer);
+  cronometer->addChild(new Node(F(">start")));
+  cronometer->addChild(new Node(F(">pause")));
+  cronometer->addChild(new Node(F(">reset")));
 
 
   Node* counter = new Node(F(">counter"));
-  addChild(enter, counter);
-  addChild(counter, new Node(F(">up")));
-  addChild(counter, new Node(F(">down")));
-  addChild(counter, new Node(F(">reset")));
+  enter->addChild(counter);
+  counter->addChild(new Node(F(">up")));
+  counter->addChild(new Node(F(">down")));
+  counter->addChild(new Node(F(">reset")));
 
 
   Node* system = new Node(F(">system"));
-  addChild(enter, system);
+  enter->addChild(system);
 
   Node* board = new Node(F(">board"));
-  addChild(system, board);
-  addChild(board, new Node(F("model:\\nArduino UNO R3")));
+  system->addChild(board);
+  board->addChild(new Node(F("model:\\nArduino UNO R3")));
 
   Node* ucontroller = new Node(F(">ucontroller"));
-  addChild(system, ucontroller);
-  addChild(ucontroller, new Node(F("model:\\nATmega328P")));
-  addChild(ucontroller, new Node(F("CPU:\\n8-bit AVR (RISC)")));
-  addChild(ucontroller, new Node(F("max speed:\\n20 MIPS @ 20 MHz")));
-  addChild(ucontroller, new Node(F("flash:\\n32 KB")));
-  addChild(ucontroller, new Node(F("SRAM:\\n2 KB")));
-  addChild(ucontroller, new Node(F("EEPROM:\\n1 KB")));
+  system->addChild(ucontroller);
+  ucontroller->addChild(new Node(F("model:\\nATmega328P")));
+  ucontroller->addChild(new Node(F("CPU:\\n8-bit AVR (RISC)")));
+  ucontroller->addChild(new Node(F("max speed:\\n20 MIPS @ 20 MHz")));
+  ucontroller->addChild(new Node(F("flash:\\n32 KB")));
+  ucontroller->addChild(new Node(F("SRAM:\\n2 KB")));
+  ucontroller->addChild(new Node(F("EEPROM:\\n1 KB")));
 
   // Node* display_shield = new Node(F(">display"));
   // addChild(system, display_shield);
   // addChild(display_shield, new Node(F("shield:\\nLCD Keypad")));
 
   Node* firmware = new Node(F(">firmware"));
-  addChild(system, firmware);
-  addChild(firmware, new Node(F("language:\\nArduino C++")));
-  addChild(firmware, new Node(F("compiler:\\navr-g++")));
-  addChild(firmware, new Node(F("author:\\nOmar El Laden")));
+  system->addChild(firmware);
+  firmware->addChild(new Node(F("language:\\nArduino C++")));
+  firmware->addChild(new Node(F("compiler:\\navr-g++")));
+  firmware->addChild(new Node(F("author:\\nOmar El Laden")));
 
-  addChild(enter, new Node(F(">logout")));
+  enter->addChild(new Node(F(">logout")));
 
   return root;
 }
