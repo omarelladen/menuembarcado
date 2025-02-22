@@ -32,7 +32,7 @@ void StateManager::navigateBack()
   {
     p_ger_grafico->setLcdIsClean(false);
     currentNode = currentNode->getParent();
-    Node::setCursor(Node::getMenuCursorStack().pop());
+    currentNode->setCursor(currentNode->getMenuCursorStack().pop());
   } 
 }
 
@@ -50,13 +50,13 @@ void StateManager::navigateUp()
   }
 
   // Navegacao entre nos
-  else if (Node::getCursor() > 0)
+  else if (currentNode->getCursor() > 0)
   {
-    if (currentNode->getParent()->getChild(Node::getCursor()-1) != nullptr)
+    if (currentNode->getParent()->getChild(currentNode->getCursor()-1) != nullptr)
     {
       p_ger_grafico->setLcdIsClean(false);
-      Node::setCursor(Node::getCursor()-1);
-      currentNode = currentNode->getParent()->getChild(Node::getCursor());
+      currentNode->setCursor(currentNode->getCursor()-1);
+      currentNode = currentNode->getParent()->getChild(currentNode->getCursor());
     }
   }
 }
@@ -75,12 +75,12 @@ void StateManager::navigateDown()
   }
 
   // Navegacao entre nos
-  else if (Node::getCursor() < currentNode->getParent()->getChildCount() - 1 and currentNode->getLabel() != F("omar@arduino:\\n/$_")) //nao pd ir para tras da raiz
-    if (currentNode->getParent()->getChild(Node::getCursor()+1) != nullptr)
+  else if (currentNode->getCursor() < currentNode->getParent()->getChildCount() - 1 and currentNode->getLabel() != F("omar@arduino:\\n/$_")) //nao pd ir para tras da raiz
+    if (currentNode->getParent()->getChild(currentNode->getCursor()+1) != nullptr)
     {
       p_ger_grafico->setLcdIsClean(false);
-      Node::setCursor(Node::getCursor()+1);
-      currentNode = currentNode->getParent()->getChild(Node::getCursor());
+      currentNode->setCursor(currentNode->getCursor()+1);
+      currentNode = currentNode->getParent()->getChild(currentNode->getCursor());
     }
 }
 
@@ -163,8 +163,8 @@ void StateManager::selectNode()
       {
         p_ger_grafico->setLcdIsClean(false);
         currentNode = currentNode->getChild(0);
-        Node::getMenuCursorStack().push(Node::getCursor());
-        Node::setCursor(0);
+        currentNode->getMenuCursorStack().push(currentNode->getCursor());
+        currentNode->setCursor(0);
       }
     }      
   } 
