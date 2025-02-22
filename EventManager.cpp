@@ -5,10 +5,13 @@ EventManager::EventManager():
   estadoBotaoAnt(BT_NENHUM),
   bt_delay(0)
 {
+  p_ger_estados = StateManager::getInstance();
 }
 
 EventManager::~EventManager()
 {
+  //delete p_ger_estados; //onde deletar?
+  p_ger_estados = nullptr;
 }
 
 uint8_t EventManager::checkButtonPress()
@@ -48,7 +51,7 @@ void EventManager::handleButtonPress(int8_t botao)
     // Solto
     if ((botao == BT_NENHUM) and (estadoBotaoAnt != BT_NENHUM) )
     {
-      /*p_ger_estados->*/botaoSolto(estadoBotaoAnt); 
+      p_ger_estados->botaoSolto(estadoBotaoAnt); 
       bt_delay = millis();
     }
   }
@@ -61,13 +64,3 @@ void EventManager::execute()
   handleButtonPress(bt_pressed);
 }
 
-
-// main()
-// {
-//   while(1)
-//   {
-//     p_ger_eventos.execute();
-//     p_ger_estados.execute();
-//     p_ger_grafico.execute();
-//   }
-// }
