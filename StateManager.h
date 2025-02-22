@@ -3,21 +3,7 @@
 #include <LiquidCrystal.h>
 #include "stack.h"
 #include "GraphicsManager.h"
-
-//Pw
-#define MAX_PW_LENGTH 4
-#define PW_0 0
-#define PW_1 0
-#define PW_2 0
-#define PW_3 1
-
-// Botoes
-#define BT_NENHUM 0
-#define BT_SELECT 1
-#define BT_LEFT   2
-#define BT_UP     3
-#define BT_DOWN   4
-#define BT_RIGHT  5
+#include "defines.h"
 
 class StateManager {
   private:

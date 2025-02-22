@@ -1,8 +1,7 @@
 #pragma once
 #include <WString.h>
 #include "stack.h"
-
-#define N_MAX_CHILD 7
+#include "defines.h"
 
 class Node {
   private:

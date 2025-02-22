@@ -1,5 +1,3 @@
-
-
 void handleButtonPress(int8_t botao);
 // void botaoApertado(int8_t botao);
 void botaoSolto(int8_t botao);

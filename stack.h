@@ -1,7 +1,6 @@
 #pragma once
 #include <stdint.h>
-
-#define MAX_STACK_SIZE 7
+#include "defines.h"
 
 class Stack {
   private:

@@ -2,21 +2,7 @@
 #include <Arduino.h>
 #include <LiquidCrystal.h>
 #include "StateManager.h"
-
-void botaoSolto(int8_t botao);/////////////////////////////
-
-// Pin
-#define PIN_BOTOES A0
-
-
-// Tensoes dos botoes
-#define SEL_THRESHOLD   800
-#define LEFT_THRESHOLD  600
-#define UP_THRESHOLD    400
-#define DOWN_THRESHOLD  200
-#define RIGHT_THRESHOLD  60
-
-#define DEBOUNCE_TIME 50
+#include "defines.h"
 
 class EventManager {
   private:

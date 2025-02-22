@@ -1,6 +1,5 @@
 #include "GraphicsManager.h"
 
-
 GraphicsManager* GraphicsManager::instance = nullptr;
 
 GraphicsManager::GraphicsManager():

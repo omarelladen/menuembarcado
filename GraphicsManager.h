@@ -2,17 +2,8 @@
 #include <Arduino.h>
 #include <LiquidCrystal.h>
 #include "tree.h"
-
 #include "cronometer.h"
-
-// Pin
-#define PIN_D4 4
-#define PIN_D5 5
-#define PIN_D6 6
-#define PIN_D7 7
-#define PIN_RS 8
-#define PIN_EN 9
-#define PIN_BACK_LIGHT 10
+#include "defines.h"
 
 class GraphicsManager {
   private:
