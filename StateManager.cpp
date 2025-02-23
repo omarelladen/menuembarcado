@@ -38,7 +38,7 @@ void StateManager::navigateBack()
 
 void StateManager::navigateUp()
 {
-  // Navegacao de teclado para senha
+  // Navegacao de teclado para senha ///desacoplar
   if(currentNode->getParent()->getLabel() == String(F(">keyboard")))
   {
     int8_t num = currentNode->getLabel()[0] - '0';
@@ -63,7 +63,7 @@ void StateManager::navigateUp()
 
 void StateManager::navigateDown()
 {
-  // Navegacao de teclado para senha
+  // Navegacao de teclado para senha ///desacoplar
   if(currentNode->getParent()->getLabel() == String(F(">keyboard")))
   {
     int8_t num = currentNode->getLabel()[0] - '0';
@@ -86,7 +86,7 @@ void StateManager::navigateDown()
 
 void StateManager::executeButton()
 {
-  // Funcionalidades (sem filhos)
+  // Funcionalidades (sem filhos) ///desacoplar
   if (currentNode->getLabel() == String(F(">up")))
     cont_counter++;
   else if (currentNode->getLabel() == String(F(">down")))
@@ -101,6 +101,7 @@ void StateManager::executeButton()
     cronometer.reset();
   else if (currentNode->getLabel() == String(F(">logout")))
   {
+    ///melhorar
     navigateBack();
     navigateBack();
   }
@@ -132,9 +133,9 @@ void StateManager::selectNode()
   {
     if (currentNode->getChild(0) != nullptr)
     {
-      bool pass = false;
+      bool pass_flag = false;
 
-      // Verificacao de senha
+      // Verificacao de senha ///desacoplar
       if (currentNode->getLabel() == String(F(">enter")))
       {
         
@@ -149,17 +150,17 @@ void StateManager::selectNode()
              pw_1 == PW_1 and
              pw_2 == PW_2 and
              pw_3 == PW_3)
-            pass = true;
+            pass_flag = true;
         }
       }
 
       // Navegacao normal
       else
-        pass = true;
+        pass_flag = true;
       
 
       // Navega entre nos
-      if(pass == true)
+      if(pass_flag == true)
       {
         p_ger_grafico->setLcdIsClean(false);
         currentNode = currentNode->getChild(0);

@@ -8,6 +8,7 @@ class EventManager {
   private:
     int8_t estadoBotaoAnt;
     unsigned long bt_delay;
+    
     StateManager* p_ger_estados; //pra notificar o bt pressionado
 
   public:

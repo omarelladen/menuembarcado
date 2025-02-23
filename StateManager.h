@@ -8,18 +8,17 @@
 class StateManager {
   private:
     Node* currentNode;
-    Stack menu_cursor_stack;//?
-    int8_t cursor;//?
-    //Node lista_estados[MAX_NUM_ESTADOS] //lista de estados ativos para executar
+   
+    static StateManager* instance;
+    
     GraphicsManager* p_ger_grafico; //pra notificar a flag pra limpar tela ou nao, ou pra chamar o clear, ou pra passar a lista pra printar
 
+    //Node lista_estados[MAX_NUM_ESTADOS] //lista de estados ativos para executar
+    
     ///desacoplar
     int16_t cont_counter;
     Stack pw; //C //se n for global precisaria alocar array?
     Cronometer cronometer;
-
-    static StateManager* instance;
-
 
   public:
     StateManager();

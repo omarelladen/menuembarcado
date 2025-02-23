@@ -4,7 +4,7 @@ EventManager::EventManager():
   estadoBotaoAnt(BT_NENHUM),
   bt_delay(0)
 {
-  p_ger_estados = StateManager::getInstance();
+  p_ger_estados = new StateManager();
 }
 
 EventManager::~EventManager()

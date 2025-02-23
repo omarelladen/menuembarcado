@@ -7,7 +7,7 @@ class Node {
   private:
     static Stack menu_cursor_stack;
     static int8_t cursor;
-
+    
     String label;
     Node* children[N_MAX_CHILD]; // Array de filhos 
     int8_t childCount; 
